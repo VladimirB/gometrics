@@ -6,8 +6,11 @@ import (
 )
 
 func main() {
-	http.HandleFunc("/update/", handler.MetricsHandler())
-	err := http.ListenAndServe(":8080", nil)
+	mux := http.NewServeMux()
+	mux.Handle("/update/gauge/", handler.GaugeHandler())
+	mux.Handle("/update/counter/", handler.CounterHandler())
+
+	err := http.ListenAndServe(":8080", mux)
 	if err != nil {
 		panic(err)
 	}
