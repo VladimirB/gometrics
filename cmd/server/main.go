@@ -7,8 +7,7 @@ import (
 
 func main() {
 	mux := http.NewServeMux()
-	mux.Handle("/update/gauge/", handler.GaugeHandler())
-	mux.Handle("/update/counter/", handler.CounterHandler())
+	mux.Handle("/update/", handler.MetricHandler())
 
 	err := http.ListenAndServe(":8080", mux)
 	if err != nil {
