@@ -1,19 +1,20 @@
 package agent
 
 import (
-	"log"
+	"fmt"
 	"math/rand"
+	"net/http"
 	"runtime"
 
-	"github.com/VladimirB/gometrics/internal/http"
+	"github.com/VladimirB/gometrics/internal/metricapi"
 	model "github.com/VladimirB/gometrics/internal/model"
 )
 
 type Agent struct {
-	sender http.Sender
+	sender metricapi.Sender
 }
 
-func NewAgent(sender http.Sender) Agent {
+func NewAgent(sender metricapi.Sender) Agent {
 	return Agent{
 		sender: sender,
 	}
@@ -75,22 +76,24 @@ func fill(metrics map[string]model.Metrics, metricType string, metricName string
 }
 
 func (a Agent) Send(metric model.Metrics) error {
-		switch metric.MType {
-		case model.Counter:
-			response, err := a.sender.PostCounter(metric)
-			log.Println("Trying counter POST...", response)
-			if err != nil {
-				log.Println(err)
-				return err
-			}
-		case model.Gauge:
-			response, err := a.sender.PostGauge(metric)
-			log.Println("Trying gauge POST...", response)
-			if err != nil {
-				log.Println(err)
-				return err
-			}
-		}
+	var url string
 
-		return nil
+	switch metric.MType {
+	case model.Counter:
+		url = fmt.Sprintf("http://localhost:8080/update/counter/%s/%d", metric.ID, int(*metric.Value))
+	case model.Gauge:
+		url = fmt.Sprintf("http://localhost:8080/update/counter/%s/%f", metric.ID, *metric.Value)
+	default:
+		return fmt.Errorf("unsupported metric type: %s", metric.MType)
+	}
+
+	response, err := a.sender.PostMetric(url, metric)
+	if err != nil {
+		return err
+	}
+	if response.StatusCode != http.StatusOK {
+		return fmt.Errorf("error on metric send: %d, %v", response.StatusCode, metric)
+	}
+
+	return nil
 }
