@@ -1,13 +1,25 @@
 package agent
 
 import (
+	"log"
 	"math/rand"
 	"runtime"
 
+	"github.com/VladimirB/gometrics/internal/http"
 	model "github.com/VladimirB/gometrics/internal/model"
 )
 
-func ReadMetrics(metrics map[string]model.Metrics) {
+type Agent struct {
+	sender http.Sender
+}
+
+func NewAgent(sender http.Sender) Agent {
+	return Agent{
+		sender: sender,
+	}
+}
+
+func (Agent) ReadMetrics(metrics map[string]model.Metrics) {
 	var stats runtime.MemStats
 	runtime.ReadMemStats(&stats)
 
@@ -60,4 +72,25 @@ func fill(metrics map[string]model.Metrics, metricType string, metricName string
 	}
 	
 	*metric.Value = value
+}
+
+func (a Agent) Send(metric model.Metrics) error {
+		switch metric.MType {
+		case model.Counter:
+			response, err := a.sender.PostCounter(metric)
+			log.Println("Trying counter POST...", response)
+			if err != nil {
+				log.Println(err)
+				return err
+			}
+		case model.Gauge:
+			response, err := a.sender.PostGauge(metric)
+			log.Println("Trying gauge POST...", response)
+			if err != nil {
+				log.Println(err)
+				return err
+			}
+		}
+
+		return nil
 }
