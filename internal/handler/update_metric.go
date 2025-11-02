@@ -7,16 +7,18 @@ import (
 	"strings"
 )
 
-func MetricHandler() http.HandlerFunc {
+const UPDATE_METRIC_PATTERN = "/update/"
+
+func UpdateMetricHandler() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		log.Println(r.URL)
-		
+
 		if r.Method != http.MethodPost {
 			http.Error(w, "only POST allowed", http.StatusMethodNotAllowed)
 			return
 		}
 
-		path := strings.TrimPrefix(r.URL.Path, "/update/")
+		path := strings.TrimPrefix(r.URL.Path, UPDATE_METRIC_PATTERN)
 		paths := strings.Split(path, "/")
 		if len(paths) != 3 { // type/name/value
 			http.Error(w, "metric not found", http.StatusNotFound)
