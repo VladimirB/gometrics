@@ -5,6 +5,8 @@ import (
 	"net/http"
 	"strconv"
 	"strings"
+
+	model "github.com/VladimirB/gometrics/internal/model"
 )
 
 const UPDATE_METRIC_PATTERN = "/update/"
@@ -28,12 +30,12 @@ func UpdateMetricHandler() http.HandlerFunc {
 		metricType := paths[0]
 		metricValue := paths[2]
 		switch metricType {
-		case "gauge":
+		case model.Gauge:
 			if _, err := strconv.ParseFloat(metricValue, 64); err != nil {
 				http.Error(w, "incorrect metric value type, only float allowed", http.StatusBadRequest)
 				return
 			}
-		case "counter":
+		case model.Counter:
 			if _, err := strconv.Atoi(metricValue); err != nil {
 				http.Error(w, "incorrect metric value type, only int allowed", http.StatusBadRequest)
 				return
