@@ -9,7 +9,7 @@ import (
 	model "github.com/VladimirB/gometrics/internal/model"
 )
 
-const UPDATE_METRIC_PATTERN = "/update/"
+const UpdateMetricPath = "/update/"
 
 func UpdateMetricHandler() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
@@ -20,7 +20,7 @@ func UpdateMetricHandler() http.HandlerFunc {
 			return
 		}
 
-		path := strings.TrimPrefix(r.URL.Path, UPDATE_METRIC_PATTERN)
+		path := strings.TrimPrefix(r.URL.Path, UpdateMetricPath)
 		paths := strings.Split(path, "/")
 		if len(paths) != 3 { // type/name/value
 			http.Error(w, "metric not found", http.StatusNotFound)
