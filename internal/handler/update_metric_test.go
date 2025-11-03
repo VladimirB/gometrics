@@ -77,6 +77,7 @@ func TestUpdateMetricHandler(t *testing.T) {
 			handler := handler.UpdateMetricHandler()
 			handler(recorder, request)
 			result := recorder.Result()
+			defer result.Body.Close()
 
 			assert.Equal(t, tt.want.statusCode, result.StatusCode)
 		})
