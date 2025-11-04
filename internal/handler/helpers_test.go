@@ -12,16 +12,18 @@ import (
 
 func CreateTestServer() *httptest.Server {
 	memStorage := repository.NewMemStorage()
+	mainPageHandler := NewMainPageHandler(memStorage)
 	updateHandler := NewUpdateMetricHandler(memStorage)
 	valueHandler := NewValueMetricHandler(memStorage)
-	return httptest.NewServer(NewRouter(updateHandler, valueHandler))
+	return httptest.NewServer(NewRouter(mainPageHandler, updateHandler, valueHandler))
 }
 
 func CreateTestServerWithStorage(storage *repository.MemStorage) *httptest.Server {
 	memStorage := storage
+	mainPageHandler := NewMainPageHandler(memStorage)
 	updateHandler := NewUpdateMetricHandler(memStorage)
 	valueHandler := NewValueMetricHandler(memStorage)
-	return httptest.NewServer(NewRouter(updateHandler, valueHandler))
+	return httptest.NewServer(NewRouter(mainPageHandler, updateHandler, valueHandler))
 }
 
 func MakeTestRequest(t *testing.T, ts *httptest.Server, method string, path string) (*http.Response, string) {

@@ -27,3 +27,7 @@ func (ms *MemStorage) Get(metricName string) (models.Metrics, error) {
 		return metric, nil
 	}
 }
+
+func (ms *MemStorage) GetAll() map[string]models.Metrics {
+	return ms.storage
+}

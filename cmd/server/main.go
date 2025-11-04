@@ -9,10 +9,11 @@ import (
 
 func main() {
 	memStorage := repository.NewMemStorage()
+	mainPageHandler := handler.NewMainPageHandler(memStorage)
 	updateHandler := handler.NewUpdateMetricHandler(memStorage)
 	valueHandler := handler.NewValueMetricHandler(memStorage)
 
-	err := http.ListenAndServe(":8080", handler.NewRouter(updateHandler, valueHandler))
+	err := http.ListenAndServe(":8080", handler.NewRouter(mainPageHandler, updateHandler, valueHandler))
 	if err != nil {
 		panic(err)
 	}
