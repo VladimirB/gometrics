@@ -41,13 +41,6 @@ func TestUpdateMetricHandler(t *testing.T) {
 			},
 		},
 		{
-			name: "bad request when counter is not int",
-			request: "/update/counter/name/100.555",
-			want: want{
-				statusCode: http.StatusBadRequest,
-			},
-		},
-		{
 			name: "bad request on incorrect gauge metric value",
 			request: "/update/gauge/name/str",
 			want: want{

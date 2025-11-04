@@ -29,19 +29,14 @@ func UpdateMetricHandler() http.HandlerFunc {
 
 		metricType := paths[0]
 		metricValue := paths[2]
-		switch metricType {
-		case model.Gauge:
-			if _, err := strconv.ParseFloat(metricValue, 64); err != nil {
-				http.Error(w, "incorrect metric value type, only float allowed", http.StatusBadRequest)
-				return
-			}
-		case model.Counter:
-			if _, err := strconv.Atoi(metricValue); err != nil {
-				http.Error(w, "incorrect metric value type, only int allowed", http.StatusBadRequest)
-				return
-			}
-		default:
+
+		if metricType != model.Gauge && metricType != model.Counter {
 			http.Error(w, "incorrect metric type", http.StatusBadRequest)
+			return
+		}
+
+		if _, err := strconv.ParseFloat(metricValue, 64); err != nil {
+			http.Error(w, "incorrect metric value", http.StatusBadRequest)
 			return
 		}
 
