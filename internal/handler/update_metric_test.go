@@ -27,6 +27,7 @@ func TestPostMetricHandler(t *testing.T) {
 	for _, tt := range testTable {
 		t.Run(tt.name, func(t *testing.T) {
 			response, _ := handler.MakeTestRequest(t, server, http.MethodPost, tt.url)
+			response.Body.Close()
 			assert.Equal(t, tt.statusCode, response.StatusCode)
 		})
 	}
@@ -48,6 +49,7 @@ func TestPostMetricNoNameHandler(t *testing.T) {
 	for _, tt := range testTable {
 		t.Run(tt.name, func(t *testing.T) {
 			response, _ := handler.MakeTestRequest(t, server, http.MethodPost, tt.url)
+			response.Body.Close()
 			assert.Equal(t, tt.statusCode, response.StatusCode)
 		})
 	}

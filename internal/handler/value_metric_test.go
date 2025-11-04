@@ -32,6 +32,7 @@ func TestValueMetricHandler_GetMetricHandler(t *testing.T) {
 	for _, tt := range testTable {
 		t.Run(tt.name, func(t *testing.T) {
 			response, body := handler.MakeTestRequest(t, server, http.MethodGet, tt.url)
+			response.Body.Close()
 			assert.Equal(t, tt.statusCode, response.StatusCode)
 			if response.StatusCode == http.StatusOK {
 				assert.Equal(t, tt.body, body)
