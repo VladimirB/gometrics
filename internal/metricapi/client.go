@@ -1,32 +1,39 @@
 package metricapi
 
 import (
-	"net/http"
+	"fmt"
 	"time"
 
 	models "github.com/VladimirB/gometrics/internal/model"
+	"github.com/go-resty/resty/v2"
 )
 
 type Client struct {
-	client *http.Client
+	client *resty.Client
 }
 
 func NewClient() *Client {
 	return &Client{
-		client: &http.Client{
-			Timeout: 3 * time.Second,
-		},
+		client: resty.New().SetTimeout(3 * time.Second),
 	}
 }
 
-func (c Client) PostMetric(url string, metric models.Metrics) (Response, error) {
-	response, err := c.client.Post(url, "text/plain", http.NoBody)
+func (c Client) PostMetric(metric models.Metrics) (Response, error) {
+	response, err := c.client.R().
+		SetHeader("Content-Type", "text/plain").
+		SetPathParams(map[string]string{
+			"metricType": metric.MType,
+			"metricName": metric.ID,
+			"metricValue": fmt.Sprintf("%f", *metric.Value),
+		}).
+		Post("http://localhost:8080/update/{metricType}/{metricName}/{metricValue}")
+
 	if err != nil {
 		return Response{}, err
 	}
-	defer response.Body.Close()
 
 	return Response{
-		StatusCode: response.StatusCode,
+		StatusCode: response.StatusCode(),
+		Body: response.String(),
 	}, nil
 }

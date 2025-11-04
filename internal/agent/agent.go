@@ -76,23 +76,12 @@ func fill(metrics map[string]model.Metrics, metricType string, metricName string
 }
 
 func (a Agent) Send(metric model.Metrics) error {
-	var url string
-
-	switch metric.MType {
-	case model.Counter:
-		url = fmt.Sprintf("http://localhost:8080/update/counter/%s/%d", metric.ID, int(*metric.Value))
-	case model.Gauge:
-		url = fmt.Sprintf("http://localhost:8080/update/counter/%s/%f", metric.ID, *metric.Value)
-	default:
-		return fmt.Errorf("unsupported metric type: %s", metric.MType)
-	}
-
-	response, err := a.sender.PostMetric(url, metric)
+	response, err := a.sender.PostMetric(metric)
 	if err != nil {
 		return err
 	}
 	if response.StatusCode != http.StatusOK {
-		return fmt.Errorf("error on metric send: %d, %v", response.StatusCode, metric)
+		return fmt.Errorf("error on metric send: %d, %q, %v", response.StatusCode, response.Body, metric)
 	}
 
 	return nil
