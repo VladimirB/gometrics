@@ -7,26 +7,13 @@ import (
 	"testing"
 
 	"github.com/VladimirB/gometrics/internal/handler"
+	"github.com/VladimirB/gometrics/internal/repository"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 )
 
-func testRequest(t *testing.T, ts *httptest.Server, method, path string) (*http.Response, string) {
-    req, err := http.NewRequest(method, ts.URL+path, nil)
-    require.NoError(t, err)
-						
-    resp, err := ts.Client().Do(req)
-    require.NoError(t, err)
-    defer resp.Body.Close()
-
-    respBody, err := io.ReadAll(resp.Body)
-    require.NoError(t, err)
-
-    return resp, string(respBody)
-}
-
 func TestPostMetricHandler(t *testing.T) {
-	server := httptest.NewServer(handler.NewRouter())
+	server := createTestServer()
 	defer server.Close()
 
 	testTable := []struct {
@@ -50,7 +37,7 @@ func TestPostMetricHandler(t *testing.T) {
 }
 
 func TestPostMetricNoNameHandler(t *testing.T) {
-	server := httptest.NewServer(handler.NewRouter())
+	server := createTestServer()
 	defer server.Close()
 
 	testTable := []struct {
@@ -68,4 +55,24 @@ func TestPostMetricNoNameHandler(t *testing.T) {
 			assert.Equal(t, tt.statusCode, response.StatusCode)
 		})
 	}
+}
+
+func createTestServer() *httptest.Server {
+	memStorage := repository.NewMemStorage()
+	metricHandler := handler.NewUpdateMetricHandler(memStorage)
+	return httptest.NewServer(handler.NewRouter(metricHandler))
+}
+
+func testRequest(t *testing.T, ts *httptest.Server, method, path string) (*http.Response, string) {
+    req, err := http.NewRequest(method, ts.URL+path, nil)
+    require.NoError(t, err)
+						
+    resp, err := ts.Client().Do(req)
+    require.NoError(t, err)
+    defer resp.Body.Close()
+
+    respBody, err := io.ReadAll(resp.Body)
+    require.NoError(t, err)
+
+    return resp, string(respBody)
 }

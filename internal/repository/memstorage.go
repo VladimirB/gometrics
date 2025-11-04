@@ -1,29 +1,29 @@
 package repository
 
+import (
+	"fmt"
+
+	models "github.com/VladimirB/gometrics/internal/model"
+)
+
 type MemStorage struct {
-	storage map[string]any
+	storage map[string]models.Metrics
 }
 
-func (ms MemStorage) Save(metricName string, value any) {
-	ms.storage[metricName] = value
-}
-
-func (ms MemStorage) GetGauge(metricName string) *float64 {
-	var value float64
-	var ok bool
-	if value, ok = ms.storage[metricName].(float64); !ok {
-		return nil
+func NewMemStorage() *MemStorage {
+	return &MemStorage{
+		storage: make(map[string]models.Metrics),
 	}
-
-	return &value
 }
 
-func (ms MemStorage) GetCounter(metricName string) *int {
-	var value int
-	var ok bool
-	if value, ok = ms.storage[metricName].(int); !ok {
-		return nil
-	}
+func (ms *MemStorage) Save(metricName string, metric models.Metrics) {
+	ms.storage[metricName] = metric
+}
 
-	return &value
+func (ms *MemStorage) Get(metricName string) (models.Metrics, error) {
+	if metric, ok := ms.storage[metricName]; !ok {
+		return models.Metrics{}, fmt.Errorf("metric %q not found", metricName)
+	} else {
+		return metric, nil
+	}
 }
