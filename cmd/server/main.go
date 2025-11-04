@@ -9,9 +9,10 @@ import (
 
 func main() {
 	memStorage := repository.NewMemStorage()
-	metricHandler := handler.NewUpdateMetricHandler(memStorage)
-	
-	err := http.ListenAndServe(":8080", handler.NewRouter(metricHandler))
+	updateHandler := handler.NewUpdateMetricHandler(memStorage)
+	valueHandler := handler.NewValueMetricHandler(memStorage)
+
+	err := http.ListenAndServe(":8080", handler.NewRouter(updateHandler, valueHandler))
 	if err != nil {
 		panic(err)
 	}
