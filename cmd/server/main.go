@@ -7,10 +7,7 @@ import (
 )
 
 func main() {
-	mux := http.NewServeMux()
-	mux.Handle(handler.UpdateMetricPath, handler.UpdateMetricHandler())
-
-	err := http.ListenAndServe(":8080", mux)
+	err := http.ListenAndServe(":8080", handler.NewRouter())
 	if err != nil {
 		panic(err)
 	}
