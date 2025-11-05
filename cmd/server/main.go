@@ -1,6 +1,7 @@
 package main
 
 import (
+	"fmt"
 	"net/http"
 
 	"github.com/VladimirB/gometrics/internal/handler"
@@ -13,7 +14,10 @@ func main() {
 	updateHandler := handler.NewUpdateMetricHandler(memStorage)
 	valueHandler := handler.NewValueMetricHandler(memStorage)
 
-	err := http.ListenAndServe(":8080", handler.NewRouter(mainPageHandler, updateHandler, valueHandler))
+	parseFlags()
+	fmt.Printf("Run server with %s:%d\n", serverConfig.Host, serverConfig.Port)
+
+	err := http.ListenAndServe(serverConfig.String(), handler.NewRouter(mainPageHandler, updateHandler, valueHandler))
 	if err != nil {
 		panic(err)
 	}
