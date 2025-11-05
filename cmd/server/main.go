@@ -15,9 +15,9 @@ func main() {
 	valueHandler := handler.NewValueMetricHandler(memStorage)
 
 	parseFlags()
-	fmt.Printf("Run server with %s:%d\n", serverConfig.Host, serverConfig.Port)
+	fmt.Printf("Run server with %s\n", serverConfig.Address.String())
 
-	err := http.ListenAndServe(serverConfig.String(), handler.NewRouter(mainPageHandler, updateHandler, valueHandler))
+	err := http.ListenAndServe(serverConfig.Address.String(), handler.NewRouter(mainPageHandler, updateHandler, valueHandler))
 	if err != nil {
 		panic(err)
 	}

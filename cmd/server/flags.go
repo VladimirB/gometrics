@@ -7,11 +7,13 @@ import (
 )
 
 var serverConfig config.ServerConfig = config.ServerConfig{
-	Host: "localhost",
-	Port: 8080,
+	Address: config.NetAddress{
+		Host: "localhost",
+		Port: 8080,
+	},
 }
 
 func parseFlags() {
-	flag.Var(&serverConfig, "a", "string value in host:port format")
+	flag.Var(&serverConfig.Address, "a", "string value in host:port format")
 	flag.Parse()
 }
