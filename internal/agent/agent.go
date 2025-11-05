@@ -75,8 +75,8 @@ func fill(metrics map[string]model.Metrics, metricType string, metricName string
 	*metric.Value = value
 }
 
-func (a Agent) Send(metric model.Metrics) error {
-	response, err := a.sender.PostMetric(metric)
+func (a Agent) Send(server string, metric model.Metrics) error {
+	response, err := a.sender.PostMetric(server, metric)
 	if err != nil {
 		return err
 	}

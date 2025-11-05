@@ -1,6 +1,7 @@
 package main
 
 import (
+	"fmt"
 	"log"
 	"time"
 
@@ -9,26 +10,24 @@ import (
 	model "github.com/VladimirB/gometrics/internal/model"
 )
 
-const (
-	pollInterval = 2
-	reportInterval = 10
-)
-
 func main() {
 	metrics := make(map[string]model.Metrics)
 	agent := agent.NewAgent(metricapi.NewClient())
+
+	parseFlags()
+	fmt.Println("run agent with config:", agentConfig)
 
 	timer := 0
 	for {
 		timer++
 
-		if timer % pollInterval == 0 {
+		if timer % agentConfig.PollInterval == 0 {
 			agent.ReadMetrics(metrics)
 		}
 
-		if timer % reportInterval == 0 {
+		if timer % agentConfig.ReportInterval == 0 {
 			for _, metric := range(metrics) {
-				err := agent.Send(metric)
+				err := agent.Send(agentConfig.Address.String(), metric)
 				if err != nil {
 					log.Println(err)
 				}

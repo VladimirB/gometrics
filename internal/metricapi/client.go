@@ -18,7 +18,7 @@ func NewClient() *Client {
 	}
 }
 
-func (c Client) PostMetric(metric models.Metrics) (Response, error) {
+func (c Client) PostMetric(server string, metric models.Metrics) (Response, error) {
 	response, err := c.client.R().
 		SetHeader("Content-Type", "text/plain").
 		SetPathParams(map[string]string{
@@ -26,7 +26,7 @@ func (c Client) PostMetric(metric models.Metrics) (Response, error) {
 			"metricName": metric.ID,
 			"metricValue": fmt.Sprintf("%f", *metric.Value),
 		}).
-		Post("http://localhost:8080/update/{metricType}/{metricName}/{metricValue}")
+		Post(fmt.Sprintf("http://%s/update/{metricType}/{metricName}/{metricValue}", server))
 
 	if err != nil {
 		return Response{}, err
