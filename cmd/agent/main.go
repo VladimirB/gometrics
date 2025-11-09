@@ -2,7 +2,6 @@ package main
 
 import (
 	"fmt"
-	"log"
 	"time"
 
 	"github.com/VladimirB/gometrics/internal/agent"
@@ -30,12 +29,7 @@ func main() {
 		case <-pollTicker.C:
 			agent.ReadMetrics(metrics)
 		case <-reportTicker.C:
-			for _, metric := range metrics {
-				err := agent.Send(config.Address.String(), metric)
-				if err != nil {
-					log.Println(err)
-				}
-			}
+			agent.SendMetrics(config.Address.String(), metrics)
 		}
 	}
 }

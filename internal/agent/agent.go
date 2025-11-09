@@ -1,6 +1,7 @@
 package agent
 
 import (
+	"log"
 	"math/rand"
 	"runtime"
 
@@ -76,10 +77,16 @@ func fill(metrics map[string]model.Metrics, metricType string, metricName string
 	*metric.Value = value
 }
 
-func (a Agent) Send(server string, metric model.Metrics) error {
-	if err := a.metricSender.Send(server, metric); err != nil {
-		return err
+func (a Agent) SendMetrics(server string, metrics map[string]model.Metrics) {
+	var dropCounter = true
+	for _, metric := range metrics {
+		if err := a.metricSender.Send(server, metric); err != nil {
+			log.Println(err)
+			dropCounter = false
+		}
 	}
 
-	return nil
+	if dropCounter {
+		fill(metrics, model.Counter, model.PollCount, 0)
+	}
 }
