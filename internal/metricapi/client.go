@@ -2,6 +2,7 @@ package metricapi
 
 import (
 	"fmt"
+	"net/http"
 	"time"
 
 	models "github.com/VladimirB/gometrics/internal/model"
@@ -18,7 +19,7 @@ func NewClient() *Client {
 	}
 }
 
-func (c Client) PostMetric(server string, metric models.Metrics) (Response, error) {
+func (c Client) Send(server string, metric models.Metrics) error {
 	response, err := c.client.R().
 		SetHeader("Content-Type", "text/plain").
 		SetPathParams(map[string]string{
@@ -29,11 +30,12 @@ func (c Client) PostMetric(server string, metric models.Metrics) (Response, erro
 		Post(fmt.Sprintf("http://%s/update/{metricType}/{metricName}/{metricValue}", server))
 
 	if err != nil {
-		return Response{}, err
+		return err
 	}
 
-	return Response{
-		StatusCode: response.StatusCode(),
-		Body: response.String(),
-	}, nil
+	if response.StatusCode() != http.StatusOK {
+		return fmt.Errorf("error on metric send: %d, %q, %v", response.StatusCode(), response.String(), metric)
+	}
+
+	return nil
 }

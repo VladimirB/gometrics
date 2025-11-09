@@ -1,22 +1,23 @@
 package agent
 
 import (
-	"fmt"
 	"math/rand"
-	"net/http"
 	"runtime"
 
-	"github.com/VladimirB/gometrics/internal/metricapi"
 	model "github.com/VladimirB/gometrics/internal/model"
 )
 
 type Agent struct {
-	sender metricapi.Sender
+	metricSender MetricSender
 }
 
-func NewAgent(sender metricapi.Sender) Agent {
-	return Agent{
-		sender: sender,
+type MetricSender interface {
+	Send(destination string, metric model.Metrics) error
+}
+
+func NewAgent(sender MetricSender) *Agent {
+	return &Agent{
+		metricSender: sender,
 	}
 }
 
@@ -76,12 +77,8 @@ func fill(metrics map[string]model.Metrics, metricType string, metricName string
 }
 
 func (a Agent) Send(server string, metric model.Metrics) error {
-	response, err := a.sender.PostMetric(server, metric)
-	if err != nil {
+	if err := a.metricSender.Send(server, metric); err != nil {
 		return err
-	}
-	if response.StatusCode != http.StatusOK {
-		return fmt.Errorf("error on metric send: %d, %q, %v", response.StatusCode, response.Body, metric)
 	}
 
 	return nil
