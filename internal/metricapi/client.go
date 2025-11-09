@@ -23,8 +23,8 @@ func (c Client) Send(server string, metric models.Metrics) error {
 	response, err := c.client.R().
 		SetHeader("Content-Type", "text/plain").
 		SetPathParams(map[string]string{
-			"metricType": metric.MType,
-			"metricName": metric.ID,
+			"metricType":  metric.MType,
+			"metricName":  metric.ID,
 			"metricValue": fmt.Sprintf("%f", *metric.Value),
 		}).
 		Post(fmt.Sprintf("http://%s/update/{metricType}/{metricName}/{metricValue}", server))

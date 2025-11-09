@@ -7,7 +7,7 @@ import (
 	"github.com/VladimirB/gometrics/internal/repository"
 )
 
-type MainPageHandler struct{
+type MainPageHandler struct {
 	storage *repository.MemStorage
 }
 
@@ -46,7 +46,7 @@ func (h MainPageHandler) GetMainPage() http.HandlerFunc {
 					</tr>
 		`)
 
-		for _, metric := range(h.storage.GetAll()) {
+		for _, metric := range h.storage.GetAll() {
 			row := fmt.Sprintf(`
 					<tr>
 						<td>%s</td>

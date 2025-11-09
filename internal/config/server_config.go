@@ -1,6 +1,6 @@
 package config
 
-const(
+const (
 	defaultServerHost = "localhost"
 	defaultServerPort = 8080
 )

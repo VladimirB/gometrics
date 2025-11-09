@@ -5,8 +5,8 @@ import (
 	"github.com/go-chi/chi/v5/middleware"
 )
 
-func NewRouter(mainPageHandler *MainPageHandler, 
-	updateHandler *UpdateMetricHandler, 
+func NewRouter(mainPageHandler *MainPageHandler,
+	updateHandler *UpdateMetricHandler,
 	valueHandler *ValueMetricHandler) *chi.Mux {
 
 	router := chi.NewRouter()

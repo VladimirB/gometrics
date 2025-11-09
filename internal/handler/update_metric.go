@@ -30,7 +30,7 @@ func (h UpdateMetricHandler) PostMetricHandler() http.HandlerFunc {
 		metricName := chi.URLParam(r, "metricName")
 		if metricName == "" {
 			http.Error(w, "incorrect metric name", http.StatusBadRequest)
-			return 
+			return
 		}
 
 		var metricValue float64
@@ -41,8 +41,8 @@ func (h UpdateMetricHandler) PostMetricHandler() http.HandlerFunc {
 			metricValue = parsed
 		}
 
-		metric := model.Metrics {
-			ID: metricName,
+		metric := model.Metrics{
+			ID:    metricName,
 			MType: metricType,
 			Value: new(float64),
 		}

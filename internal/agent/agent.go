@@ -51,7 +51,7 @@ func (Agent) ReadMetrics(metrics map[string]model.Metrics) {
 	fill(metrics, model.Gauge, model.Sys, float64(stats.Sys))
 	fill(metrics, model.Gauge, model.TotalAlloc, float64(stats.TotalAlloc))
 	fill(metrics, model.Gauge, model.RandomValue, rand.Float64())
-	
+
 	var counter = 0
 	pollCount, ok := metrics[model.PollCount]
 	if ok {
@@ -65,14 +65,14 @@ func fill(metrics map[string]model.Metrics, metricType string, metricName string
 	metric, ok := metrics[metricName]
 	if !ok {
 		metric = model.Metrics{
-			ID: metricName,
+			ID:    metricName,
 			MType: metricType,
 			Value: new(float64),
 			Delta: nil,
 		}
 		metrics[metricName] = metric
 	}
-	
+
 	*metric.Value = value
 }
 
