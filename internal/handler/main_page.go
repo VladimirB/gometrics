@@ -2,7 +2,10 @@ package handler
 
 import (
 	"html/template"
+	"log"
 	"net/http"
+	"path/filepath"
+	"runtime"
 
 	models "github.com/VladimirB/gometrics/internal/model"
 	"github.com/VladimirB/gometrics/internal/repository"
@@ -25,7 +28,16 @@ type MainPageData struct {
 var mainPage *template.Template
 
 func init() {
-	mainPage = template.Must(template.ParseFiles("web/template/index.html"))
+	// Не удается пройти тесты на CI. Предполагаю, что потому что в пайплайне тестов запуск производится
+	// не из корня проекта: cd cmd/server 
+	_, filename, _, ok := runtime.Caller(0)
+	if !ok {
+		log.Fatal("Не удалось получить текущий путь к файлу")
+	}
+	rootDir := filepath.Dir(filepath.Dir(filepath.Dir(filename))) 
+	absoulutePath := filepath.Join(rootDir, "web/template/index.html")
+
+	mainPage = template.Must(template.ParseFiles(absoulutePath))
 }
 
 func (h MainPageHandler) GetMainPage() http.HandlerFunc {
