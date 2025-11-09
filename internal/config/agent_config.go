@@ -1,8 +1,8 @@
 package config
 
 const(
-	defaultHost = "localhost"
-	defaultPort = 8080
+	defaultAgentHost = "localhost"
+	defaultAgentPort = 8080
 	defaultPollInterval = 2
 	defaultReportInterval = 10
 )
@@ -16,8 +16,8 @@ type AgentConfig struct {
 func NewAgentConfig() *AgentConfig {
 	return &AgentConfig{
 		Address: NetAddress{
-			Host: defaultHost,
-			Port: defaultPort,
+			Host: defaultAgentHost,
+			Port: defaultAgentPort,
 		},
 		PollInterval: defaultPollInterval,
 		ReportInterval: defaultReportInterval,
