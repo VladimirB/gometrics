@@ -2,6 +2,7 @@ package main
 
 import (
 	"fmt"
+	"log"
 	"net/http"
 
 	"github.com/VladimirB/gometrics/internal/config"
@@ -21,6 +22,6 @@ func main() {
 
 	err := http.ListenAndServe(config.Address.String(), handler.NewRouter(mainPageHandler, updateHandler, valueHandler))
 	if err != nil {
-		panic(err)
+		log.Fatal(err)
 	}
 }
