@@ -1,9 +1,10 @@
 package handler
 
 import (
-	"fmt"
+	"html/template"
 	"net/http"
 
+	models "github.com/VladimirB/gometrics/internal/model"
 	"github.com/VladimirB/gometrics/internal/repository"
 )
 
@@ -17,51 +18,31 @@ func NewMainPageHandler(storage *repository.MemStorage) *MainPageHandler {
 	}
 }
 
+type MainPageData struct {
+	Metrics map[string]models.Metrics
+}
+
+var mainPage *template.Template
+
+func init() {
+	mainPage = template.Must(template.ParseFiles("web/template/index.html"))
+}
+
 func (h MainPageHandler) GetMainPage() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		w.Header().Set("Content-Type", "text/html; charset=utf-8")
 
-		fmt.Fprint(w, `
-			<!DOCTYPE html>
-			<html>
-			<head>
-				<title>Таблица с метриками</title>
-			<head>
-			<style>
-				table {
-  					border-spacing: 5px;
-					width: 50%;
-				}
-				th {
-  					text-align: left;
-				}
-			</style>
-			<body>
-				<h1>Список метрик</h1>
-				<table>
-					<tr>
-						<th>ID</th>
-						<th>Type</th>
-						<th>Value</th>
-					</tr>
-		`)
-
-		for _, metric := range h.storage.GetAll() {
-			row := fmt.Sprintf(`
-					<tr>
-						<td>%s</td>
-						<td>%s</td>
-						<td>%v</td>
-					</tr>
-			`, metric.ID, metric.MType, *metric.Value)
-			fmt.Fprint(w, row)
+		metrics := h.storage.GetAll()
+		pageData := MainPageData{
+			Metrics: metrics,
 		}
 
-		fmt.Fprintf(w, `
-				</table>
-			</body>
-			</html>
-		`)
+		err := mainPage.Execute(w, pageData)
+		if err != nil {
+			http.Error(w, "error on parsing of main page: "+err.Error(), http.StatusInternalServerError)
+			return
+		}
+
 		w.WriteHeader(http.StatusOK)
 	}
 }
