@@ -19,23 +19,23 @@ func main() {
 	parseFlags(config)
 	fmt.Println("run agent with config:", config)
 
-	timer := 0
+	pollTicker := time.NewTicker(time.Duration(config.PollInterval) * time.Second)
+	defer pollTicker.Stop()
+
+	reportTicker := time.NewTicker(time.Duration(config.ReportInterval) * time.Second)
+	defer reportTicker.Stop()
+
 	for {
-		timer++
-
-		if timer % config.PollInterval == 0 {
+		select {
+		case <-pollTicker.C:
 			agent.ReadMetrics(metrics)
-		}
-
-		if timer % config.ReportInterval == 0 {
-			for _, metric := range(metrics) {
+		case <-reportTicker.C:
+			for _, metric := range metrics {
 				err := agent.Send(config.Address.String(), metric)
 				if err != nil {
 					log.Println(err)
 				}
 			}
 		}
-
-		time.Sleep(1 * time.Second)
 	}
 }
