@@ -1,7 +1,6 @@
 package main
 
 import (
-	"fmt"
 	"log"
 	"net/http"
 
@@ -18,7 +17,7 @@ func main() {
 
 	config := config.NewServerConfig()
 	parseFlags(config)
-	fmt.Printf("run server with %s\n", config.Address.String())
+	log.Println("run server:", config.Address.String())
 
 	err := http.ListenAndServe(config.Address.String(), handler.NewRouter(mainPageHandler, updateHandler, valueHandler))
 	if err != nil {

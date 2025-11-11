@@ -1,7 +1,6 @@
 package main
 
 import (
-	"fmt"
 	"time"
 
 	"github.com/VladimirB/gometrics/internal/agent"
@@ -16,7 +15,6 @@ func main() {
 
 	config := config.NewAgentConfig()
 	parseFlags(config)
-	fmt.Println("run agent with config:", config)
 
 	pollTicker := time.NewTicker(time.Duration(config.PollInterval) * time.Second)
 	defer pollTicker.Stop()
