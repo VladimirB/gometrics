@@ -12,7 +12,7 @@ import (
 
 func CreateTestServer() *httptest.Server {
 	memStorage := repository.NewMemStorage()
-	mainPageHandler := NewMainPageHandler(memStorage)
+	mainPageHandler := NewMainPageHandler(memStorage, nil)
 	updateHandler := NewUpdateMetricHandler(memStorage)
 	valueHandler := NewValueMetricHandler(memStorage)
 	return httptest.NewServer(NewRouter(mainPageHandler, updateHandler, valueHandler))
@@ -20,7 +20,7 @@ func CreateTestServer() *httptest.Server {
 
 func CreateTestServerWithStorage(storage *repository.MemStorage) *httptest.Server {
 	memStorage := storage
-	mainPageHandler := NewMainPageHandler(memStorage)
+	mainPageHandler := NewMainPageHandler(memStorage, nil)
 	updateHandler := NewUpdateMetricHandler(memStorage)
 	valueHandler := NewValueMetricHandler(memStorage)
 	return httptest.NewServer(NewRouter(mainPageHandler, updateHandler, valueHandler))

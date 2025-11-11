@@ -1,6 +1,8 @@
 package main
 
 import (
+	"embed"
+	"html/template"
 	"log"
 	"net/http"
 
@@ -9,9 +11,14 @@ import (
 	"github.com/VladimirB/gometrics/internal/repository"
 )
 
+//go:embed web/template
+var templateFiles embed.FS
+
 func main() {
+	mainPageTemplate := template.Must(template.ParseFS(templateFiles, "web/template/index.html"))
+
 	memStorage := repository.NewMemStorage()
-	mainPageHandler := handler.NewMainPageHandler(memStorage)
+	mainPageHandler := handler.NewMainPageHandler(memStorage, mainPageTemplate)
 	updateHandler := handler.NewUpdateMetricHandler(memStorage)
 	valueHandler := handler.NewValueMetricHandler(memStorage)
 
