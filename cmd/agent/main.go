@@ -13,13 +13,12 @@ func main() {
 	metrics := make(map[string]model.Metrics)
 	agent := agent.NewAgent(metricapi.NewClient())
 
-	config := config.NewAgentConfig()
-	parseFlags(config)
+	cfg := config.GetAgentConfig()
 
-	pollTicker := time.NewTicker(time.Duration(config.PollInterval) * time.Second)
+	pollTicker := time.NewTicker(time.Duration(cfg.PollInterval) * time.Second)
 	defer pollTicker.Stop()
 
-	reportTicker := time.NewTicker(time.Duration(config.ReportInterval) * time.Second)
+	reportTicker := time.NewTicker(time.Duration(cfg.ReportInterval) * time.Second)
 	defer reportTicker.Stop()
 
 	for {
@@ -27,7 +26,7 @@ func main() {
 		case <-pollTicker.C:
 			agent.ReadMetrics(metrics)
 		case <-reportTicker.C:
-			agent.SendMetrics(config.Address.String(), metrics)
+			agent.SendMetrics(cfg.Address.String(), metrics)
 		}
 	}
 }

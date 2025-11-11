@@ -1,5 +1,7 @@
 package config
 
+import "flag"
+
 const (
 	defaultAgentHost      = "localhost"
 	defaultAgentPort      = 8080
@@ -13,8 +15,8 @@ type AgentConfig struct {
 	ReportInterval int
 }
 
-func NewAgentConfig() *AgentConfig {
-	return &AgentConfig{
+func GetAgentConfig() AgentConfig {
+	config := AgentConfig{
 		Address: NetAddress{
 			Host: defaultAgentHost,
 			Port: defaultAgentPort,
@@ -22,4 +24,11 @@ func NewAgentConfig() *AgentConfig {
 		PollInterval:   defaultPollInterval,
 		ReportInterval: defaultReportInterval,
 	}
+
+	flag.Var(&config.Address, "a", "string value in host:port format")
+	flag.IntVar(&config.PollInterval, "p", defaultPollInterval, "metric poll interval in seconds")
+	flag.IntVar(&config.ReportInterval, "r", defaultReportInterval, "metric send interval in seconds")
+	flag.Parse()
+
+	return config
 }
