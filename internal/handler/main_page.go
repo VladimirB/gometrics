@@ -9,13 +9,13 @@ import (
 )
 
 type MainPageHandler struct {
-	storage *repository.MemStorage
+	storage  *repository.MemStorage
 	template *template.Template
 }
 
 func NewMainPageHandler(storage *repository.MemStorage, template *template.Template) *MainPageHandler {
 	return &MainPageHandler{
-		storage: storage,
+		storage:  storage,
 		template: template,
 	}
 }

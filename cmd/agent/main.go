@@ -15,10 +15,10 @@ func main() {
 
 	cfg := config.GetAgentConfig()
 
-	pollTicker := time.NewTicker(time.Duration(cfg.PollInterval) * time.Second)
+	pollTicker := time.NewTicker(cfg.PollInterval)
 	defer pollTicker.Stop()
 
-	reportTicker := time.NewTicker(time.Duration(cfg.ReportInterval) * time.Second)
+	reportTicker := time.NewTicker(cfg.ReportInterval)
 	defer reportTicker.Stop()
 
 	for {
@@ -26,7 +26,7 @@ func main() {
 		case <-pollTicker.C:
 			agent.ReadMetrics(metrics)
 		case <-reportTicker.C:
-			agent.SendMetrics(cfg.Address.String(), metrics)
+			agent.SendMetrics(cfg.Address, metrics)
 		}
 	}
 }
