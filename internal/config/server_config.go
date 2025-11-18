@@ -23,6 +23,7 @@ func GetServerConfig() ServerConfig {
 
 	var addressFlag string
 	flag.StringVar(&addressFlag, "a", defaultServerAddress, "server address")
+	flag.Parse()
 
 	if config.Address == "" {
 		config.Address = addressFlag
