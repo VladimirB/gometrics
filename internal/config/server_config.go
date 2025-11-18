@@ -1,19 +1,32 @@
 package config
 
+import (
+	"flag"
+	"log"
+
+	"github.com/caarlos0/env/v6"
+)
+
 const (
-	defaultServerHost = "localhost"
-	defaultServerPort = 8080
+	defaultServerAddress = "localhost:8080"
 )
 
 type ServerConfig struct {
-	Address NetAddress
+	Address string `env:"ADDRESS"`
 }
 
-func NewServerConfig() *ServerConfig {
-	return &ServerConfig{
-		Address: NetAddress{
-			Host: defaultServerHost,
-			Port: defaultServerPort,
-		},
+func GetServerConfig() ServerConfig {
+	config := ServerConfig{}
+	if err := env.Parse(&config); err != nil {
+		log.Println(err)
 	}
+
+	var addressFlag string
+	flag.StringVar(&addressFlag, "a", defaultServerAddress, "server address")
+
+	if config.Address == "" {
+		config.Address = addressFlag
+	}
+
+	return config
 }

@@ -22,11 +22,10 @@ func main() {
 	updateHandler := handler.NewUpdateMetricHandler(memStorage)
 	valueHandler := handler.NewValueMetricHandler(memStorage)
 
-	config := config.NewServerConfig()
-	parseFlags(config)
-	log.Println("run server:", config.Address.String())
+	config := config.GetServerConfig()
+	log.Println("run server:", config.Address)
 
-	err := http.ListenAndServe(config.Address.String(), handler.NewRouter(mainPageHandler, updateHandler, valueHandler))
+	err := http.ListenAndServe(config.Address, handler.NewRouter(mainPageHandler, updateHandler, valueHandler))
 	if err != nil {
 		log.Fatal(err)
 	}
