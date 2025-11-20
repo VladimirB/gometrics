@@ -4,7 +4,11 @@ go 1.24.2
 
 require github.com/stretchr/testify v1.11.1
 
-require golang.org/x/net v0.33.0 // indirect
+require (
+	go.uber.org/multierr v1.11.0 // indirect
+	go.uber.org/zap v1.27.1 // indirect
+	golang.org/x/net v0.33.0 // indirect
+)
 
 require (
 	github.com/caarlos0/env/v6 v6.10.1
