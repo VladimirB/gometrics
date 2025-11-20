@@ -36,6 +36,6 @@ func main() {
 
 	err := http.ListenAndServe(config.Address, handler.NewRouter(mainPageHandler, updateHandler, valueHandler))
 	if err != nil {
-		log.Fatal(err)
+		logger.Log.Fatal(err.Error())
 	}
 }
