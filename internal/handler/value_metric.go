@@ -1,6 +1,8 @@
 package handler
 
 import (
+	"bytes"
+	"encoding/json"
 	"fmt"
 	"net/http"
 
@@ -33,6 +35,41 @@ func (h ValueMetricHandler) GetMetricHandler() http.HandlerFunc {
 			return
 		} else {
 			w.Write([]byte(fmt.Sprint(*metric.Value)))
+			w.WriteHeader(http.StatusOK)
+		}
+	}
+}
+
+func (h ValueMetricHandler) PostValueMetricHandler() http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		var buffer bytes.Buffer
+		if _, err := buffer.ReadFrom(r.Body); err != nil {
+			http.Error(w, err.Error(), http.StatusBadRequest)
+			return
+		}
+
+		var askedMetric models.Metrics
+		if err := json.Unmarshal(buffer.Bytes(), &askedMetric); err != nil {
+			http.Error(w, err.Error(), http.StatusBadRequest)
+			return
+		}
+
+		if err := askedMetric.Validate(); err != nil {
+			http.Error(w, err.Error(), http.StatusBadRequest)
+			return
+		}
+
+		metric, err := h.storage.Get(askedMetric.ID)
+		if err != nil {
+			http.Error(w, err.Error(), http.StatusNotFound)
+			return
+		}
+
+		if resp, err := json.Marshal(metric); err != nil {
+			http.Error(w, err.Error(), http.StatusInternalServerError)
+			return
+		} else {
+			w.Write(resp)
 			w.WriteHeader(http.StatusOK)
 		}
 	}
