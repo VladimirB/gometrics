@@ -14,8 +14,9 @@ func NewRouter(mainPageHandler *MainPageHandler,
 		r.Get("/", RequestLogger(mainPageHandler.GetMainPage()))
 
 		r.Route("/update", func(r chi.Router) {
-			r.Post("/{metricType}/{metricValue}", RequestLogger(updateHandler.PostMetricNoNameHandler()))
-			r.Post("/{metricType}/{metricName}/{metricValue}", RequestLogger(updateHandler.PostMetricHandler()))
+			r.Post("/", RequestLogger(updateHandler.UpdateMetricJsonHandler()))
+			r.Post("/{metricType}/{metricValue}", RequestLogger(updateHandler.UpdateNoNameMetricHandler()))
+			r.Post("/{metricType}/{metricName}/{metricValue}", RequestLogger(updateHandler.UpdateMetricByNameHandler()))
 		})
 
 		r.Route("/value", func(r chi.Router) {

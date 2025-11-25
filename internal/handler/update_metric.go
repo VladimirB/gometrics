@@ -1,12 +1,16 @@
 package handler
 
 import (
+	"bytes"
+	"encoding/json"
 	"net/http"
 	"strconv"
 
+	"github.com/VladimirB/gometrics/internal/logger"
 	model "github.com/VladimirB/gometrics/internal/model"
 	"github.com/VladimirB/gometrics/internal/repository"
 	"github.com/go-chi/chi/v5"
+	"go.uber.org/zap"
 )
 
 type UpdateMetricHandler struct {
@@ -19,7 +23,39 @@ func NewUpdateMetricHandler(storage *repository.MemStorage) *UpdateMetricHandler
 	}
 }
 
-func (h UpdateMetricHandler) PostMetricHandler() http.HandlerFunc {
+func (h UpdateMetricHandler) UpdateMetricJsonHandler() http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		var buffer bytes.Buffer
+		_, err := buffer.ReadFrom(r.Body)
+		if err != nil {
+			http.Error(w, err.Error(), http.StatusBadRequest)
+			return
+		}
+
+		var metric model.Metrics
+		if err = json.Unmarshal(buffer.Bytes(), &metric); err != nil {
+			http.Error(w, err.Error(), http.StatusBadRequest)
+			return
+		}
+
+		if metric.ID == "" {
+			http.Error(w, "incorrect metric ID", http.StatusBadRequest)
+			return
+		}
+
+		if metric.MType != model.Gauge && metric.MType != model.Counter {
+			http.Error(w, "incorrect metric type", http.StatusBadRequest)
+			return
+		}
+
+		logger.Log.Info("Received metric", zap.String("id", metric.ID), zap.String("type", metric.MType), zap.Float64("value", *metric.Value))
+		h.storage.Save(metric.ID, metric)
+
+		w.WriteHeader(http.StatusOK)
+	}
+}
+
+func (h UpdateMetricHandler) UpdateMetricByNameHandler() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		metricType := chi.URLParam(r, "metricType")
 		if metricType != model.Gauge && metricType != model.Counter {
@@ -53,7 +89,7 @@ func (h UpdateMetricHandler) PostMetricHandler() http.HandlerFunc {
 	}
 }
 
-func (UpdateMetricHandler) PostMetricNoNameHandler() http.HandlerFunc {
+func (UpdateMetricHandler) UpdateNoNameMetricHandler() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, "incorrect path", http.StatusNotFound)
 		w.WriteHeader(http.StatusNotFound)
