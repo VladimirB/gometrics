@@ -26,7 +26,7 @@ func main() {
 	}
 	defer logger.Log.Sync()
 
-	logger.Log.Info("Running Server", zap.Time("Start time", time.Now()))
+	logger.Log.Info("Running Server", zap.String("Start time", time.Now().Local().String()))
 
 	mainPageTemplate := template.Must(template.ParseFS(templateFiles, "web/template/index.html"))
 

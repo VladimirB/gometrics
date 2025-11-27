@@ -20,7 +20,7 @@ func main() {
 	}
 	defer logger.Log.Sync()
 
-	logger.Log.Info("Running Agent", zap.Time("Start time", time.Now()))
+	logger.Log.Info("Running Agent", zap.String("Start time", time.Now().Local().String()))
 
 	metrics := make(map[string]model.Metrics)
 	agent := agent.NewAgent(metricapi.NewClient())
