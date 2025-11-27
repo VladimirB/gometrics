@@ -10,7 +10,7 @@ type MetricResponse struct {
 
 func MetricToResponse(metric models.Metrics) MetricResponse {
 	var result = MetricResponse{
-		ID: metric.ID,
+		ID:   metric.ID,
 		Type: metric.MType,
 	}
 

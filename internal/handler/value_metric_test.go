@@ -7,13 +7,15 @@ import (
 	"github.com/VladimirB/gometrics/internal/handler"
 	models "github.com/VladimirB/gometrics/internal/model"
 	"github.com/VladimirB/gometrics/internal/repository"
+	"github.com/VladimirB/gometrics/internal/service"
 	"github.com/stretchr/testify/assert"
 )
 
 func TestValueMetricHandler_GetMetricHandler(t *testing.T) {
 	storage := repository.NewMemStorage()
-	storage.Save(models.PollCount, createMetric(models.Counter, models.PollCount, 100))
-	storage.Save(models.Alloc, createMetric(models.Gauge, models.Alloc, 3.14))
+	service := service.NewMetricsService(storage)
+	service.Save(createMetric(models.Counter, models.PollCount, 100))
+	service.Save(createMetric(models.Gauge, models.Alloc, 3.14))
 
 	server := handler.CreateTestServerWithStorage(storage)
 	defer server.Close()
