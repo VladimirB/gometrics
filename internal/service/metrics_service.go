@@ -21,7 +21,7 @@ func (s *MetricsService) Save(metric model.Metrics) error {
 	}
 
 	// Значения для счетчика необходимо сохранять в Delta
-	if metric.MType == model.Counter {
+	if metric.MType == model.Counter && metric.Value != nil {
 		if metric.Delta == nil {
 			metric.Delta = new(int64)
 		}
