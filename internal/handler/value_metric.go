@@ -70,8 +70,8 @@ func (h ValueMetricHandler) PostValueMetricHandler() http.HandlerFunc {
 			http.Error(w, err.Error(), http.StatusInternalServerError)
 			return
 		} else {
-			w.Write(resp)
 			w.Header().Set("Content-Type", "application/json")
+			w.Write(resp)
 			w.WriteHeader(http.StatusOK)
 		}
 	}
