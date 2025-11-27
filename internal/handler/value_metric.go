@@ -71,7 +71,7 @@ func (h ValueMetricHandler) PostValueMetricHandler() http.HandlerFunc {
 			return
 		} else {
 			w.Write(resp)
-			w.Header().Add("Content-Type", "application/json")
+			w.Header().Set("Content-Type", "application/json")
 			w.WriteHeader(http.StatusOK)
 		}
 	}
