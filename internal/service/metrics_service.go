@@ -25,7 +25,13 @@ func (s *MetricsService) Save(metric model.Metrics) error {
 		if metric.Delta == nil {
 			metric.Delta = new(int64)
 		}
-		*metric.Delta = int64(*metric.Value)
+
+		if saved, err := s.storage.Get(metric.ID); err == nil {
+			*metric.Delta = *saved.Delta + int64(*metric.Value)
+		} else {
+			*metric.Delta = int64(*metric.Value)
+		}
+
 		metric.Value = nil
 	}
 
