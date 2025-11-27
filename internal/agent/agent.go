@@ -1,6 +1,7 @@
 package agent
 
 import (
+	"errors"
 	"math/rand"
 	"runtime"
 
@@ -78,16 +79,14 @@ func fill(metrics map[string]model.Metrics, metricType string, metricName string
 	*metric.Value = value
 }
 
-func (a Agent) SendMetrics(server string, metrics map[string]model.Metrics) {
-	var dropCounter = true
+func (a Agent) SendMetrics(server string, metrics map[string]model.Metrics) error {
 	for _, metric := range metrics {
 		if err := a.metricSender.Send(server, metric); err != nil {
-			logger.Log.Error("Error on metric send", zap.Error(err))
-			dropCounter = false
+			logger.Log.Error("error on metric send", zap.Error(err))
+			fill(metrics, model.Counter, model.PollCount, 0)
+			return errors.New("error on metric send")
 		}
 	}
 
-	if dropCounter {
-		fill(metrics, model.Counter, model.PollCount, 0)
-	}
+	return nil
 }
