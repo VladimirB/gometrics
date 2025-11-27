@@ -5,6 +5,7 @@ import (
 	"html/template"
 	"log"
 	"net/http"
+	"time"
 
 	"github.com/VladimirB/gometrics/internal/config"
 	"github.com/VladimirB/gometrics/internal/handler"
@@ -24,6 +25,8 @@ func main() {
 		log.Fatal(err)
 	}
 	defer logger.Log.Sync()
+
+	logger.Log.Info("Running Server", zap.Time("Start time", time.Now()))
 
 	mainPageTemplate := template.Must(template.ParseFS(templateFiles, "web/template/index.html"))
 
