@@ -41,7 +41,7 @@ func main() {
 			sendFunc := func() error {
 				return agent.SendMetrics(cfg.Address, metrics)
 			}
-			
+
 			doWithRetry(sendFunc, 5, 3*time.Second)
 		}
 	}

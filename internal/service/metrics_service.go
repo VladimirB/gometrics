@@ -15,9 +15,9 @@ func NewMetricsService(storage *repository.MemStorage) *MetricsService {
 	}
 }
 
-func (s *MetricsService) Save(metric model.Metrics) error {
+func (s *MetricsService) Save(metric model.Metrics) (model.Metrics, error) {
 	if err := metric.Validate(); err != nil {
-		return err
+		return model.Metrics{}, err
 	}
 
 	// Значения для счетчика необходимо сохранять в Delta
@@ -37,7 +37,7 @@ func (s *MetricsService) Save(metric model.Metrics) error {
 
 	s.storage.Save(metric.ID, metric)
 
-	return nil
+	return metric, nil
 }
 
 func (s *MetricsService) SaveByFields(metricType string, metricID string, value float64) error {
@@ -48,7 +48,8 @@ func (s *MetricsService) SaveByFields(metricType string, metricID string, value 
 	}
 	metric.Value = &value
 
-	return s.Save(metric)
+	_, err := s.Save(metric)
+	return err
 }
 
 func (s *MetricsService) Get(metricID string) (model.Metrics, error) {
