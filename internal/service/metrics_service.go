@@ -34,9 +34,9 @@ func (s *MetricsService) Save(metric model.Metrics) error {
 	return nil
 }
 
-func (s *MetricsService) SaveByFields(metricType string, metricId string, value float64) error {
+func (s *MetricsService) SaveByFields(metricType string, metricID string, value float64) error {
 	metric := model.Metrics{
-		ID:    metricId,
+		ID:    metricID,
 		MType: metricType,
 		Value: new(float64),
 	}
@@ -45,6 +45,6 @@ func (s *MetricsService) SaveByFields(metricType string, metricId string, value 
 	return s.Save(metric)
 }
 
-func (s *MetricsService) Get(metricId string) (model.Metrics, error) {
-	return s.storage.Get(metricId)
+func (s *MetricsService) Get(metricID string) (model.Metrics, error) {
+	return s.storage.Get(metricID)
 }

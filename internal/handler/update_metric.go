@@ -21,7 +21,7 @@ func NewUpdateMetricHandler(service *service.MetricsService) *UpdateMetricHandle
 	}
 }
 
-func (h UpdateMetricHandler) UpdateMetricJsonHandler() http.HandlerFunc {
+func (h UpdateMetricHandler) UpdateMetricJSONHandler() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		var buffer bytes.Buffer
 		_, err := buffer.ReadFrom(r.Body)
