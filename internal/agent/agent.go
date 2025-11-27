@@ -1,11 +1,12 @@
 package agent
 
 import (
-	"log"
 	"math/rand"
 	"runtime"
 
+	"github.com/VladimirB/gometrics/internal/logger"
 	model "github.com/VladimirB/gometrics/internal/model"
+	"go.uber.org/zap"
 )
 
 type Agent struct {
@@ -81,7 +82,7 @@ func (a Agent) SendMetrics(server string, metrics map[string]model.Metrics) {
 	var dropCounter = true
 	for _, metric := range metrics {
 		if err := a.metricSender.Send(server, metric); err != nil {
-			log.Println(err)
+			logger.Log.Error("Error on metric send", zap.Error(err))
 			dropCounter = false
 		}
 	}
