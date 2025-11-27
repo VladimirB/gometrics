@@ -39,36 +39,6 @@ const (
 	RandomValue   = "RandomValue"
 )
 
-var allowedIds = map[string]bool {
-	PollCount: true,
-	Alloc: true,
-	BuckHashSys: true,
-	Frees: true,
-	GCCPUFraction: true,
-	GCSys: true,
-	HeapAlloc: true,
-	HeapIdle: true,
-	HeapInuse: true,
-	HeapObjects: true,
-	HeapReleased: true,
-	HeapSys: true,
-	LastGC: true,
-	Lookups: true,
-	MCacheInuse: true,
-	MSpanSys: true,
-	Mallocs: true,
-	NextGC: true,
-	NumForcedGC: true,
-	NumGC: true,
-	OtherSys: true,
-	PauseTotalNs: true,
-	StackInuse: true,
-	StackSys: true,
-	Sys: true,
-	TotalAlloc: true,
-	RandomValue: true,
-}
-
 // NOTE: Не усложняем пример, вводя иерархическую вложенность структур.
 // Органичиваясь плоской моделью.
 // Delta и Value объявлены через указатели,
@@ -83,10 +53,6 @@ type Metrics struct {
 }
 
 func (m Metrics) Validate() error {
-	if !allowedIds[m.ID] {
-		return fmt.Errorf("not allowed metric ID")
-	}
-
 	if m.MType != Gauge && m.MType != Counter {
 		return fmt.Errorf("not allowed metric type")
 	}
