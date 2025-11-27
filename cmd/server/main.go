@@ -10,6 +10,7 @@ import (
 	"github.com/VladimirB/gometrics/internal/handler"
 	"github.com/VladimirB/gometrics/internal/logger"
 	"github.com/VladimirB/gometrics/internal/repository"
+	"github.com/VladimirB/gometrics/internal/service"
 	"go.uber.org/zap"
 )
 
@@ -27,9 +28,11 @@ func main() {
 	mainPageTemplate := template.Must(template.ParseFS(templateFiles, "web/template/index.html"))
 
 	memStorage := repository.NewMemStorage()
+	metricsService := service.NewMetricsService(memStorage)
+
 	mainPageHandler := handler.NewMainPageHandler(memStorage, mainPageTemplate)
-	updateHandler := handler.NewUpdateMetricHandler(memStorage)
-	valueHandler := handler.NewValueMetricHandler(memStorage)
+	updateHandler := handler.NewUpdateMetricHandler(metricsService)
+	valueHandler := handler.NewValueMetricHandler(metricsService)
 
 	config := config.GetServerConfig()
 	logger.Log.Info("run server", zap.String("address", config.Address))

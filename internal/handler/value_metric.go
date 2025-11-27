@@ -7,17 +7,18 @@ import (
 	"net/http"
 
 	models "github.com/VladimirB/gometrics/internal/model"
-	"github.com/VladimirB/gometrics/internal/repository"
+	"github.com/VladimirB/gometrics/internal/service"
 	"github.com/go-chi/chi/v5"
 )
 
 type ValueMetricHandler struct {
-	storage *repository.MemStorage
+
+	metricsService *service.MetricsService
 }
 
-func NewValueMetricHandler(storage *repository.MemStorage) *ValueMetricHandler {
+func NewValueMetricHandler(service *service.MetricsService) *ValueMetricHandler {
 	return &ValueMetricHandler{
-		storage: storage,
+		metricsService: service,
 	}
 }
 
@@ -30,7 +31,7 @@ func (h ValueMetricHandler) GetMetricHandler() http.HandlerFunc {
 		}
 
 		metricName := chi.URLParam(r, "metricName")
-		if metric, err := h.storage.Get(metricName); err != nil {
+		if metric, err := h.metricsService.Get(metricName); err != nil {
 			http.Error(w, err.Error(), http.StatusNotFound)
 			return
 		} else {
@@ -59,7 +60,7 @@ func (h ValueMetricHandler) PostValueMetricHandler() http.HandlerFunc {
 			return
 		}
 
-		metric, err := h.storage.Get(askedMetric.ID)
+		metric, err := h.metricsService.Get(askedMetric.ID)
 		if err != nil {
 			http.Error(w, err.Error(), http.StatusNotFound)
 			return

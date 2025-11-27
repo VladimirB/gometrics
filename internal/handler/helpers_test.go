@@ -7,22 +7,25 @@ import (
 	"testing"
 
 	"github.com/VladimirB/gometrics/internal/repository"
+	"github.com/VladimirB/gometrics/internal/service"
 	"github.com/stretchr/testify/require"
 )
 
 func CreateTestServer() *httptest.Server {
 	memStorage := repository.NewMemStorage()
+	metricsService := service.NewMetricsService(memStorage)
 	mainPageHandler := NewMainPageHandler(memStorage, nil)
-	updateHandler := NewUpdateMetricHandler(memStorage)
-	valueHandler := NewValueMetricHandler(memStorage)
+	updateHandler := NewUpdateMetricHandler(metricsService)
+	valueHandler := NewValueMetricHandler(metricsService)
 	return httptest.NewServer(NewRouter(mainPageHandler, updateHandler, valueHandler))
 }
 
 func CreateTestServerWithStorage(storage *repository.MemStorage) *httptest.Server {
 	memStorage := storage
+	metricsService := service.NewMetricsService(memStorage)
 	mainPageHandler := NewMainPageHandler(memStorage, nil)
-	updateHandler := NewUpdateMetricHandler(memStorage)
-	valueHandler := NewValueMetricHandler(memStorage)
+	updateHandler := NewUpdateMetricHandler(metricsService)
+	valueHandler := NewValueMetricHandler(metricsService)
 	return httptest.NewServer(NewRouter(mainPageHandler, updateHandler, valueHandler))
 }
 

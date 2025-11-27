@@ -17,8 +17,8 @@ func TestPostMetricHandler(t *testing.T) {
 		url        string
 		statusCode int
 	}{
-		{"success counter metric", "/update/counter/name/100", http.StatusOK},
-		{"success gauge metric", "/update/gauge/name/100.55", http.StatusOK},
+		{"success counter metric", "/update/counter/PollCount/100", http.StatusOK},
+		{"success gauge metric", "/update/gauge/Alloc/100.55", http.StatusOK},
 		{"incorrect counter metric value", "/update/counter/name/str", http.StatusBadRequest},
 		{"incorrect gauge metric value", "/update/gauge/name/str", http.StatusBadRequest},
 		{"unknown metric type", "/update/unknown/name/100", http.StatusBadRequest},
