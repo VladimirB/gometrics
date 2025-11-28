@@ -14,8 +14,8 @@ import (
 func TestValueMetricHandler_GetMetricHandler(t *testing.T) {
 	storage := repository.NewMemStorage()
 	service := service.NewMetricsService(storage)
-	service.Save(createMetric(models.Counter, models.PollCount, 100))
-	service.Save(createMetric(models.Gauge, models.Alloc, 3.14))
+	service.SaveByFields(models.Counter, models.PollCount, 100)
+	service.SaveByFields(models.Gauge, models.Alloc, 3.14)
 
 	server := handler.CreateTestServerWithStorage(storage)
 	defer server.Close()
@@ -41,14 +41,4 @@ func TestValueMetricHandler_GetMetricHandler(t *testing.T) {
 			}
 		})
 	}
-}
-
-func createMetric(metricType string, metricName string, value float64) models.Metrics {
-	metric := models.Metrics{
-		ID:    metricName,
-		MType: metricType,
-		Value: new(float64),
-	}
-	metric.Value = &value
-	return metric
 }
