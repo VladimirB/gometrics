@@ -43,6 +43,8 @@ func (Agent) ReadMetrics(metrics map[string]model.Metrics) {
 	fill(metrics, model.Gauge, model.LastGC, float64(stats.LastGC))
 	fill(metrics, model.Gauge, model.Lookups, float64(stats.Lookups))
 	fill(metrics, model.Gauge, model.MCacheInuse, float64(stats.MCacheInuse))
+	fill(metrics, model.Gauge, model.MCacheSys, float64(stats.MCacheSys))
+	fill(metrics, model.Gauge, model.MSpanInuse, float64(stats.MSpanInuse))
 	fill(metrics, model.Gauge, model.MSpanSys, float64(stats.MSpanSys))
 	fill(metrics, model.Gauge, model.Mallocs, float64(stats.Mallocs))
 	fill(metrics, model.Gauge, model.NextGC, float64(stats.NextGC))

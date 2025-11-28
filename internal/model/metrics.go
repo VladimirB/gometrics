@@ -25,6 +25,8 @@ const (
 	LastGC        = "LastGC"
 	Lookups       = "Lookups"
 	MCacheInuse   = "MCacheInuse"
+	MCacheSys	  = "MCacheSys"
+	MSpanInuse	  = "MSpanInuse"
 	MSpanSys      = "MSpanSys"
 	Mallocs       = "Mallocs"
 	NextGC        = "NextGC"
