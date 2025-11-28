@@ -26,7 +26,8 @@ func main() {
 	}
 	defer logger.Log.Sync()
 
-	logger.Log.Info("Running Server", zap.String("Start time", time.Now().Local().String()))
+	config := config.GetServerConfig()
+	logger.Log.Info("Running Server", zap.String("Start time", time.Now().Local().String()), zap.String("address", config.Address))
 
 	mainPageTemplate := template.Must(template.ParseFS(templateFiles, "web/template/index.html"))
 
@@ -36,9 +37,6 @@ func main() {
 	mainPageHandler := handler.NewMainPageHandler(memStorage, mainPageTemplate)
 	updateHandler := handler.NewUpdateMetricHandler(metricsService)
 	valueHandler := handler.NewValueMetricHandler(metricsService)
-
-	config := config.GetServerConfig()
-	logger.Log.Info("run server", zap.String("address", config.Address))
 
 	err := http.ListenAndServe(config.Address, handler.NewRouter(mainPageHandler, updateHandler, valueHandler))
 	if err != nil {

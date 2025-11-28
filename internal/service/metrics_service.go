@@ -15,41 +15,39 @@ func NewMetricsService(storage *repository.MemStorage) *MetricsService {
 	}
 }
 
-func (s *MetricsService) Save(metric model.Metrics) (model.Metrics, error) {
+func (s *MetricsService) Save(metric model.Metrics) error {
 	if err := metric.Validate(); err != nil {
-		return model.Metrics{}, err
+		return err
 	}
 
 	// Значения для счетчика необходимо сохранять в Delta
-	if metric.MType == model.Counter && metric.Value != nil {
-		if metric.Delta == nil {
-			metric.Delta = new(int64)
-		}
-
+	if metric.MType == model.Counter && metric.Delta != nil {
 		if saved, err := s.storage.Get(metric.ID); err == nil {
-			*metric.Delta = *saved.Delta + int64(*metric.Value)
-		} else {
-			*metric.Delta = int64(*metric.Value)
+			*metric.Delta += *saved.Delta
 		}
-
-		metric.Value = nil
 	}
 
 	s.storage.Save(metric.ID, metric)
 
-	return metric, nil
+	return nil
 }
 
 func (s *MetricsService) SaveByFields(metricType string, metricID string, value float64) error {
 	metric := model.Metrics{
 		ID:    metricID,
 		MType: metricType,
-		Value: new(float64),
 	}
-	metric.Value = &value
 
-	_, err := s.Save(metric)
-	return err
+	switch metricType {
+	case model.Counter:
+		metric.Delta = new(int64)
+		*metric.Delta = int64(value)
+	case model.Gauge:
+		metric.Value = new(float64)
+		*metric.Value = value
+	}
+
+	return s.Save(metric)
 }
 
 func (s *MetricsService) Get(metricID string) (model.Metrics, error) {

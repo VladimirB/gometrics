@@ -16,6 +16,7 @@ type Agent struct {
 
 type MetricSender interface {
 	Send(destination string, metric model.Metrics) error
+	SendAsJSON(destination string, metric model.Metrics) error
 }
 
 func NewAgent(sender MetricSender) *Agent {
@@ -58,7 +59,7 @@ func (Agent) ReadMetrics(metrics map[string]model.Metrics) {
 	var counter = 0
 	pollCount, ok := metrics[model.PollCount]
 	if ok {
-		counter = int(*pollCount.Value)
+		counter = int(*pollCount.Delta)
 	}
 	counter++
 	fill(metrics, model.Counter, model.PollCount, float64(counter))
@@ -70,18 +71,27 @@ func fill(metrics map[string]model.Metrics, metricType string, metricName string
 		metric = model.Metrics{
 			ID:    metricName,
 			MType: metricType,
-			Value: new(float64),
-			Delta: nil,
 		}
+
+		if metricType == model.Counter {
+			metric.Delta = new(int64)
+		} else {
+			metric.Value = new(float64)
+		}
+
 		metrics[metricName] = metric
 	}
 
-	*metric.Value = value
+	if metricType == model.Counter {
+		*metric.Delta = int64(value)
+	} else {
+		*metric.Value = value
+	}
 }
 
 func (a Agent) SendMetrics(server string, metrics map[string]model.Metrics) error {
 	for _, metric := range metrics {
-		if err := a.metricSender.Send(server, metric); err != nil {
+		if err := a.metricSender.SendAsJSON(server, metric); err != nil {
 			logger.Log.Error("error on metric send", zap.Error(err))
 			fill(metrics, model.Counter, model.PollCount, 0)
 			return errors.New("error on metric send")

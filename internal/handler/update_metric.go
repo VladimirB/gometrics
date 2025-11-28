@@ -6,7 +6,6 @@ import (
 	"net/http"
 	"strconv"
 
-	"github.com/VladimirB/gometrics/internal/handler/mapper"
 	model "github.com/VladimirB/gometrics/internal/model"
 	"github.com/VladimirB/gometrics/internal/service"
 	"github.com/go-chi/chi/v5"
@@ -37,13 +36,12 @@ func (h UpdateMetricHandler) UpdateMetricJSONHandler() http.HandlerFunc {
 			return
 		}
 
-		saved, err := h.metricsService.Save(metric)
-		if err != nil {
+		if err := h.metricsService.Save(metric); err != nil {
 			http.Error(w, "incorrect metric ID", http.StatusBadRequest)
 			return
 		}
 
-		if resp, err := json.Marshal(mapper.MetricToResponse(saved)); err != nil {
+		if resp, err := json.Marshal(metric); err != nil {
 			http.Error(w, err.Error(), http.StatusInternalServerError)
 			return
 		} else {

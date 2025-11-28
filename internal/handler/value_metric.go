@@ -6,7 +6,6 @@ import (
 	"fmt"
 	"net/http"
 
-	"github.com/VladimirB/gometrics/internal/handler/mapper"
 	models "github.com/VladimirB/gometrics/internal/model"
 	"github.com/VladimirB/gometrics/internal/service"
 	"github.com/go-chi/chi/v5"
@@ -35,7 +34,11 @@ func (h ValueMetricHandler) GetMetricHandler() http.HandlerFunc {
 			http.Error(w, err.Error(), http.StatusNotFound)
 			return
 		} else {
-			w.Write([]byte(fmt.Sprint(mapper.MetricToValue(metric))))
+			if metric.MType == models.Counter {
+				w.Write([]byte(fmt.Sprint(*metric.Delta)))
+			} else {
+				w.Write([]byte(fmt.Sprint(*metric.Value)))
+			}
 			w.WriteHeader(http.StatusOK)
 		}
 	}
@@ -66,7 +69,7 @@ func (h ValueMetricHandler) PostValueMetricHandler() http.HandlerFunc {
 			return
 		}
 
-		if resp, err := json.Marshal(mapper.MetricToResponse(metric)); err != nil {
+		if resp, err := json.Marshal(metric); err != nil {
 			http.Error(w, err.Error(), http.StatusInternalServerError)
 			return
 		} else {

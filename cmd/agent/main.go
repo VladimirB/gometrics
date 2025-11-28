@@ -50,6 +50,7 @@ func main() {
 func doWithRetry(fn func() error, maxRetries int, delay time.Duration) {
 	for attempts := 0; attempts < maxRetries; attempts++ {
 		if err := fn(); err == nil {
+			logger.Log.Error("error on retry", zap.Error(err))
 			break
 		}
 
