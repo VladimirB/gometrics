@@ -94,7 +94,7 @@ func fill(metrics map[string]model.Metrics, metricType string, metricName string
 func (a Agent) SendMetrics(server string, metrics map[string]model.Metrics) error {
 	for _, metric := range metrics {
 		if err := a.metricSender.SendAsJSON(server, metric); err != nil {
-			logger.Log.Error("error on metric send", zap.Error(err))
+			logger.Log.Error("error on metric send", zap.Error(err), zap.String("Metric", metric.String()))
 			fill(metrics, model.Counter, model.PollCount, 0)
 			return errors.New("error on metric send")
 		}
