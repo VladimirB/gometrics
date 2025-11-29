@@ -6,6 +6,7 @@ import (
 	"net/http"
 	"time"
 
+	"github.com/VladimirB/gometrics/internal/compress"
 	models "github.com/VladimirB/gometrics/internal/model"
 	"github.com/go-resty/resty/v2"
 )
@@ -47,9 +48,16 @@ func (c Client) SendAsJSON(server string, metric models.Metrics) error {
 		return err
 	}
 
+	compressedBody, err := compress.Zip(body)
+	if err != nil {
+		return err
+	}
+
 	response, err := c.client.R().
 		SetHeader("Content-Type", "application/json").
-		SetBody(body).
+		SetHeader("Content-Encoding", "gzip").
+		SetHeader("Accept-Encoding", "gzip").
+		SetBody(compressedBody).
 		Post(fmt.Sprintf("http://%s/update", server))
 	if err != nil {
 		return err
