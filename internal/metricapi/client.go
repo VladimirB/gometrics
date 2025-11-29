@@ -4,11 +4,14 @@ import (
 	"encoding/json"
 	"fmt"
 	"net/http"
+	"strings"
 	"time"
 
 	"github.com/VladimirB/gometrics/internal/compress"
+	"github.com/VladimirB/gometrics/internal/logger"
 	models "github.com/VladimirB/gometrics/internal/model"
 	"github.com/go-resty/resty/v2"
+	"go.uber.org/zap"
 )
 
 type Client struct {
@@ -62,6 +65,17 @@ func (c Client) SendAsJSON(server string, metric models.Metrics) error {
 	if err != nil {
 		return err
 	}
+
+	contentEncoding := response.Header().Get("Content-Encoding")
+	gzipUsed := strings.Contains(contentEncoding, "gzip")
+	if gzipUsed {
+		compress.Unzip(response.Body())
+	}
+	
+	logger.Log.Info("Response received", 
+		zap.String("response", response.String()), 
+		zap.Int("status code", response.StatusCode()), 
+		zap.Bool("responsed with gzip", gzipUsed))
 
 	if response.StatusCode() != http.StatusOK {
 		return fmt.Errorf("error on metric update: %d, %q, %v", response.StatusCode(), response.String(), metric)

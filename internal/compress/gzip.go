@@ -21,3 +21,14 @@ func Zip(data []byte) ([]byte, error) {
 
 	return buf.Bytes(), nil
 }
+
+func Unzip(data []byte) (int, error) {
+	temp := bytes.NewReader(data)
+	r, err := gzip.NewReader(temp)
+	if err != nil {
+		return 0, err
+	}
+	defer r.Close()
+
+	return r.Read(data)
+}
