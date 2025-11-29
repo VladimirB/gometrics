@@ -61,3 +61,7 @@ func (m Metrics) Validate() error {
 
 	return nil
 }
+
+func (m Metrics) String() string {
+	return fmt.Sprintf("Metric(ID: %s, Type: %s, Value: %p, Delta: %p)", m.ID, m.MType, m.Value, m.Delta)
+}

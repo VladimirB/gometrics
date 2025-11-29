@@ -6,9 +6,11 @@ import (
 	"net/http"
 	"strconv"
 
+	"github.com/VladimirB/gometrics/internal/logger"
 	model "github.com/VladimirB/gometrics/internal/model"
 	"github.com/VladimirB/gometrics/internal/service"
 	"github.com/go-chi/chi/v5"
+	"go.uber.org/zap"
 )
 
 type UpdateMetricHandler struct {
@@ -32,6 +34,7 @@ func (h UpdateMetricHandler) UpdateMetricJSONHandler() http.HandlerFunc {
 
 		var metric model.Metrics
 		if err = json.Unmarshal(buffer.Bytes(), &metric); err != nil {
+			logger.Log.Info("error unmarshaling metric", zap.String("Metric", metric.String()))
 			http.Error(w, err.Error(), http.StatusBadRequest)
 			return
 		}
@@ -42,6 +45,7 @@ func (h UpdateMetricHandler) UpdateMetricJSONHandler() http.HandlerFunc {
 		}
 
 		if resp, err := json.Marshal(metric); err != nil {
+			logger.Log.Info("error marshaling metric", zap.String("Metric", metric.String()))
 			http.Error(w, err.Error(), http.StatusInternalServerError)
 			return
 		} else {

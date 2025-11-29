@@ -96,11 +96,13 @@ func GZip(h http.HandlerFunc) http.HandlerFunc {
 		if strings.Contains(contentEncoding, "gzip") {
 			gzr, err := NewGZipReader(r.Body)
 			if err != nil {
+				logger.Log.Error("cant read body as gzip", zap.Error(err))
 				w.WriteHeader(http.StatusInternalServerError)
 				return
 			}
 
 			r.Body = gzr
+
 			defer gzr.Close()
 		}
 

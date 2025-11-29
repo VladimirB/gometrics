@@ -73,6 +73,7 @@ func (c Client) SendAsJSON(server string, metric models.Metrics) error {
 	}
 	
 	logger.Log.Info("Response received", 
+		zap.String("body", string(body)),
 		zap.String("response", response.String()), 
 		zap.Int("status code", response.StatusCode()), 
 		zap.Bool("responsed with gzip", gzipUsed))
