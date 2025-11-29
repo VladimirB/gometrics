@@ -7,7 +7,6 @@ import (
 	"strings"
 	"time"
 
-	"github.com/VladimirB/gometrics/internal/compress"
 	"github.com/VladimirB/gometrics/internal/logger"
 	models "github.com/VladimirB/gometrics/internal/model"
 	"github.com/go-resty/resty/v2"
@@ -58,8 +57,8 @@ func (c Client) SendAsJSON(server string, metric models.Metrics) error {
 
 	response, err := c.client.R().
 		SetHeader("Content-Type", "application/json").
-		SetHeader("Content-Encoding", "gzip").
-		SetHeader("Accept-Encoding", "gzip").
+		// SetHeader("Content-Encoding", "gzip").
+		// SetHeader("Accept-Encoding", "gzip").
 		SetBody(body).
 		Post(fmt.Sprintf("http://%s/update", server))
 	if err != nil {
@@ -68,13 +67,7 @@ func (c Client) SendAsJSON(server string, metric models.Metrics) error {
 
 	contentEncoding := response.Header().Get("Content-Encoding")
 	gzipUsed := strings.Contains(contentEncoding, "gzip")
-	if gzipUsed {
-		compress.Unzip(response.Body())
-	}
-	
 	logger.Log.Info("Response received", 
-		zap.String("body", string(body)),
-		zap.String("response", response.String()), 
 		zap.Int("status code", response.StatusCode()), 
 		zap.Bool("responsed with gzip", gzipUsed))
 
