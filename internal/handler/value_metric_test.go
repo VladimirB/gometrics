@@ -59,7 +59,8 @@ func TestValueMetricHandler_PostValueMetricHandler(t *testing.T) {
 		statusCode int
 		response   string
 	}{
-		{"ask no value metric", `{"id":"AnyID", "type":"counter"}`, http.StatusOK, `{"id":"AnyID", "type":"counter"}`},
+		{"ask no value counter", `{"id":"AnyID", "type":"counter"}`, http.StatusOK, `{"id":"AnyID", "type":"counter", "delta":0}`},
+		{"ask no value gauge", `{"id":"AnyID", "type":"gauge"}`, http.StatusOK, `{"id":"AnyID", "type":"gauge", "value":0}`},
 	}
 
 	for _, tt := range tests {

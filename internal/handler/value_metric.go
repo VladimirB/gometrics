@@ -74,6 +74,12 @@ func (h ValueMetricHandler) PostValueMetricHandler() http.HandlerFunc {
 				ID: askedMetric.ID,
 				MType: askedMetric.MType,
 			}
+
+			if askedMetric.MType == models.Counter {
+				metric.Delta = new(int64)
+			} else {
+				metric.Value = new(float64)
+			}
 		}
 
 		if resp, err := json.Marshal(metric); err != nil {
