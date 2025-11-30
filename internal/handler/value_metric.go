@@ -6,9 +6,11 @@ import (
 	"fmt"
 	"net/http"
 
+	"github.com/VladimirB/gometrics/internal/logger"
 	models "github.com/VladimirB/gometrics/internal/model"
 	"github.com/VladimirB/gometrics/internal/service"
 	"github.com/go-chi/chi/v5"
+	"go.uber.org/zap"
 )
 
 type ValueMetricHandler struct {
@@ -48,25 +50,30 @@ func (h ValueMetricHandler) PostValueMetricHandler() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		var buffer bytes.Buffer
 		if _, err := buffer.ReadFrom(r.Body); err != nil {
+			logger.Log.Error("cant read request body", zap.Error(err))
 			http.Error(w, err.Error(), http.StatusBadRequest)
 			return
 		}
 
 		var askedMetric models.Metrics
 		if err := json.Unmarshal(buffer.Bytes(), &askedMetric); err != nil {
+			logger.Log.Error("cant unmarshal metric to JSON", zap.Error(err))
 			http.Error(w, err.Error(), http.StatusBadRequest)
 			return
 		}
 
 		if err := askedMetric.Validate(); err != nil {
+			logger.Log.Error("asked metric invalid", zap.Error(err), zap.String("metric", askedMetric.String()))
 			http.Error(w, err.Error(), http.StatusBadRequest)
 			return
 		}
 
 		metric, err := h.metricsService.Get(askedMetric.ID)
 		if err != nil {
-			http.Error(w, err.Error(), http.StatusNotFound)
-			return
+			metric = models.Metrics{
+				ID: askedMetric.ID,
+				MType: askedMetric.MType,
+			}
 		}
 
 		if resp, err := json.Marshal(metric); err != nil {

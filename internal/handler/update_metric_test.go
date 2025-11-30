@@ -5,6 +5,7 @@ import (
 	"testing"
 
 	"github.com/VladimirB/gometrics/internal/handler"
+	"github.com/VladimirB/gometrics/internal/service"
 	"github.com/stretchr/testify/assert"
 )
 
@@ -51,6 +52,27 @@ func TestPostMetricNoNameHandler(t *testing.T) {
 			response, _ := handler.MakeTestRequest(t, server, http.MethodPost, tt.url, "")
 			response.Body.Close()
 			assert.Equal(t, tt.statusCode, response.StatusCode)
+		})
+	}
+}
+
+func TestUpdateMetricHandler_UpdateMetricJSONHandler(t *testing.T) {
+	tests := []struct {
+		name string // description of this test case
+		// Named input parameters for receiver constructor.
+		service *service.MetricsService
+		want    http.HandlerFunc
+	}{
+		// TODO: Add test cases.
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			h := handler.NewUpdateMetricHandler(tt.service)
+			got := h.UpdateMetricJSONHandler()
+			// TODO: update the condition below to compare got with tt.want.
+			if true {
+				t.Errorf("UpdateMetricJSONHandler() = %v, want %v", got, tt.want)
+			}
 		})
 	}
 }

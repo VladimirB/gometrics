@@ -53,6 +53,27 @@ func TestValueMetricHandler_PostValueMetricHandler(t *testing.T) {
 	server := handler.CreateTestServerWithStorage(storage)
 	defer server.Close()
 
+	tests := []struct {
+		name       string
+		body       string
+		statusCode int
+		response   string
+	}{
+		{"ask no value metric", `{"id":"AnyID", "type":"counter"}`, http.StatusOK, `{"id":"AnyID", "type":"counter"}`},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			response, body := handler.MakeTestRequest(t, server, http.MethodPost, "/value", tt.body)
+			defer response.Body.Close()
+
+			assert.Equal(t, tt.statusCode, response.StatusCode)
+			if response.StatusCode == http.StatusOK {
+				assert.JSONEq(t, tt.response, body)
+			}
+		})
+	}
+
 	for metricID := range models.AllowedMetrics {
 		testName := fmt.Sprintf("POST value %s", metricID)
 		t.Run(testName, func(t *testing.T) {
