@@ -4,6 +4,7 @@ import (
 	"io"
 	"net/http"
 	"net/http/httptest"
+	"strings"
 	"testing"
 
 	"github.com/VladimirB/gometrics/internal/repository"
@@ -29,8 +30,13 @@ func CreateTestServerWithStorage(storage *repository.MemStorage) *httptest.Serve
 	return httptest.NewServer(NewRouter(mainPageHandler, updateHandler, valueHandler))
 }
 
-func MakeTestRequest(t *testing.T, ts *httptest.Server, method string, path string) (*http.Response, string) {
-	req, err := http.NewRequest(method, ts.URL+path, nil)
+func MakeTestRequest(t *testing.T, ts *httptest.Server, method string, path string, body string) (*http.Response, string) {
+	var br io.Reader
+	if body != "" {
+		br = strings.NewReader(body)
+	}
+
+	req, err := http.NewRequest(method, ts.URL+path, br)
 	require.NoError(t, err)
 
 	resp, err := ts.Client().Do(req)

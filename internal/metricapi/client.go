@@ -67,8 +67,8 @@ func (c Client) SendAsJSON(server string, metric models.Metrics) error {
 
 	contentEncoding := response.Header().Get("Content-Encoding")
 	gzipUsed := strings.Contains(contentEncoding, "gzip")
-	logger.Log.Info("Response received", 
-		zap.Int("status code", response.StatusCode()), 
+	logger.Log.Info("Response received",
+		zap.Int("status code", response.StatusCode()),
 		zap.Bool("responsed with gzip", gzipUsed))
 
 	if response.StatusCode() != http.StatusOK {

@@ -1,6 +1,8 @@
 package handler_test
 
 import (
+	"fmt"
+	"math/rand"
 	"net/http"
 	"testing"
 
@@ -33,12 +35,66 @@ func TestValueMetricHandler_GetMetricHandler(t *testing.T) {
 
 	for _, tt := range testTable {
 		t.Run(tt.name, func(t *testing.T) {
-			response, body := handler.MakeTestRequest(t, server, http.MethodGet, tt.url)
-			response.Body.Close()
+			response, body := handler.MakeTestRequest(t, server, http.MethodGet, tt.url, "")
+			defer response.Body.Close()
 			assert.Equal(t, tt.statusCode, response.StatusCode)
 			if response.StatusCode == http.StatusOK {
 				assert.Equal(t, tt.body, body)
 			}
 		})
+	}
+}
+
+func TestValueMetricHandler_PostValueMetricHandler(t *testing.T) {
+	storage := repository.NewMemStorage()
+	service := service.NewMetricsService(storage)
+	data := prepareTestData(service)
+
+	server := handler.CreateTestServerWithStorage(storage)
+	defer server.Close()
+
+	for metricID := range models.AllowedMetrics {
+		testName := fmt.Sprintf("POST value %s", metricID)
+		t.Run(testName, func(t *testing.T) {
+			response, body := handler.MakeTestRequest(t, server, http.MethodPost, "/value", requestBody(metricID))
+			defer response.Body.Close()
+
+			assert.Equal(t, http.StatusOK, response.StatusCode)
+			if response.StatusCode == http.StatusOK {
+				assert.JSONEq(t, expectedResponse(metricID, data), body)
+			}
+		})
+	}
+}
+
+func prepareTestData(service *service.MetricsService) map[string]float64 {
+	var result = make(map[string]float64)
+
+	for metricID := range models.AllowedMetrics {
+		if metricID == models.PollCount {
+			result[metricID] = float64(rand.Int())
+			service.SaveByFields(models.Counter, metricID, result[metricID])
+		} else {
+			result[metricID] = rand.Float64()
+			service.SaveByFields(models.Gauge, metricID, result[metricID])
+		}
+	}
+
+	return result
+}
+
+func requestBody(metricID string) string {
+	if metricID == models.PollCount {
+		return fmt.Sprintf(`{"id":"%s", "type":"counter"}`, metricID)
+	} else {
+		return fmt.Sprintf(`{"id":"%s", "type":"gauge"}`, metricID)
+	}
+}
+
+func expectedResponse(metricID string, data map[string]float64) string {
+	if metricID == models.PollCount {
+		return fmt.Sprintf(`{"id":"%s", "type":"counter", "delta":%d}`, metricID, int64(data[metricID]))
+	} else {
+		return fmt.Sprintf(`{"id":"%s", "type":"gauge", "value":%v}`, metricID, data[metricID])
 	}
 }
