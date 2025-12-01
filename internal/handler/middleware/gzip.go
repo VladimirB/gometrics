@@ -104,10 +104,6 @@ func GZip(h http.HandlerFunc) http.HandlerFunc {
 			defer gzr.Close()
 		}
 
-		logger.Log.Info("GZip middleware",
-			zap.String("Accept-Encoding", acceptEncoding),
-			zap.String("Content-Encoding", contentEncoding))
-
 		h.ServeHTTP(usedWriter, r)
 	}
 }
