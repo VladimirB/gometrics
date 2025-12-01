@@ -82,12 +82,12 @@ func GZip(h http.HandlerFunc) http.HandlerFunc {
 		usedWriter := w
 
 		// Если клиент поддерживает прием gzip, то устанавлияваем gzip writer как основной
-		acceptEncoding := r.Header.Get("Accept-Encoding")
-		if strings.Contains(acceptEncoding, "gzip") {
+		// acceptEncoding := r.Header.Get("Accept-Encoding")
+		// if strings.Contains(acceptEncoding, "gzip") {
 			// gzw := NewGZipWriter(w)
 			// usedWriter = gzw
 			// defer gzw.Close()
-		}
+		// }
 
 		// Если клиент отправляет нам gzip, то используем reader с поддержкой декомпрессии
 		contentEncoding := r.Header.Get("Content-Encoding")
