@@ -2,11 +2,13 @@ package handler
 
 import (
 	"io"
+	"math/rand"
 	"net/http"
 	"net/http/httptest"
 	"strings"
 	"testing"
 
+	models "github.com/VladimirB/gometrics/internal/model"
 	"github.com/VladimirB/gometrics/internal/repository"
 	"github.com/VladimirB/gometrics/internal/service"
 	"github.com/stretchr/testify/require"
@@ -38,6 +40,7 @@ func MakeTestRequest(t *testing.T, ts *httptest.Server, method string, path stri
 
 	req, err := http.NewRequest(method, ts.URL+path, br)
 	require.NoError(t, err)
+	req.Header.Set("Content-Type", "application/json")
 
 	resp, err := ts.Client().Do(req)
 	require.NoError(t, err)
@@ -47,4 +50,20 @@ func MakeTestRequest(t *testing.T, ts *httptest.Server, method string, path stri
 	require.NoError(t, err)
 
 	return resp, string(respBody)
+}
+
+func PrepareTestData(service *service.MetricsService) map[string]float64 {
+	var result = make(map[string]float64)
+
+	for metricID := range models.AllowedMetrics {
+		if metricID == models.PollCount {
+			result[metricID] = float64(rand.Int())
+			service.SaveByFields(models.Counter, metricID, result[metricID])
+		} else {
+			result[metricID] = rand.Float64()
+			service.SaveByFields(models.Gauge, metricID, result[metricID])
+		}
+	}
+
+	return result
 }

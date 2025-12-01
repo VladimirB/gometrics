@@ -71,7 +71,7 @@ func (h ValueMetricHandler) PostValueMetricHandler() http.HandlerFunc {
 		metric, err := h.metricsService.Get(askedMetric.ID)
 		if err != nil {
 			metric = models.Metrics{
-				ID: askedMetric.ID,
+				ID:    askedMetric.ID,
 				MType: askedMetric.MType,
 			}
 

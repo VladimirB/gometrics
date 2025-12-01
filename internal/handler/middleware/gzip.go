@@ -48,9 +48,7 @@ func (c *GZipWriter) Write(p []byte) (int, error) {
 }
 
 func (c *GZipWriter) WriteHeader(statusCode int) {
-	acceptEncoding := c.Header().Get("Accept-Encoding")
-
-	if statusCode < 300 && strings.Contains(acceptEncoding, "gzip") {
+	if statusCode < 300 {
 		c.w.Header().Set("Content-Encoding", "gzip")
 	}
 
@@ -86,9 +84,9 @@ func GZip(h http.HandlerFunc) http.HandlerFunc {
 		// Если клиент поддерживает прием gzip, то устанавлияваем gzip writer как основной
 		acceptEncoding := r.Header.Get("Accept-Encoding")
 		if strings.Contains(acceptEncoding, "gzip") {
-			gzw := NewGZipWriter(w)
-			usedWriter = gzw
-			defer gzw.Close()
+			// gzw := NewGZipWriter(w)
+			// usedWriter = gzw
+			// defer gzw.Close()
 		}
 
 		// Если клиент отправляет нам gzip, то используем reader с поддержкой декомпрессии

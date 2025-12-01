@@ -2,7 +2,6 @@ package handler_test
 
 import (
 	"fmt"
-	"math/rand"
 	"net/http"
 	"testing"
 
@@ -48,7 +47,7 @@ func TestValueMetricHandler_GetMetricHandler(t *testing.T) {
 func TestValueMetricHandler_PostValueMetricHandler(t *testing.T) {
 	storage := repository.NewMemStorage()
 	service := service.NewMetricsService(storage)
-	data := prepareTestData(service)
+	data := handler.PrepareTestData(service)
 
 	server := handler.CreateTestServerWithStorage(storage)
 	defer server.Close()
@@ -87,22 +86,6 @@ func TestValueMetricHandler_PostValueMetricHandler(t *testing.T) {
 			}
 		})
 	}
-}
-
-func prepareTestData(service *service.MetricsService) map[string]float64 {
-	var result = make(map[string]float64)
-
-	for metricID := range models.AllowedMetrics {
-		if metricID == models.PollCount {
-			result[metricID] = float64(rand.Int())
-			service.SaveByFields(models.Counter, metricID, result[metricID])
-		} else {
-			result[metricID] = rand.Float64()
-			service.SaveByFields(models.Gauge, metricID, result[metricID])
-		}
-	}
-
-	return result
 }
 
 func requestBody(metricID string) string {
