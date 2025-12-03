@@ -21,7 +21,7 @@ func NewRouter(mainPageHandler *MainPageHandler,
 		})
 
 		r.Route("/value", func(r chi.Router) {
-			r.Post("/", RequestLogger(valueHandler.PostValueMetricHandler()))
+			r.Post("/", RequestLogger(middleware.GZip(valueHandler.PostValueMetricHandler())))
 			r.Get("/{metricType}/{metricName}", RequestLogger(valueHandler.GetMetricHandler()))
 		})
 	})
