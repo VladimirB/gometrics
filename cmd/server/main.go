@@ -34,7 +34,7 @@ func main() {
 	memStorage := repository.NewMemStorage()
 	metricsService := service.NewMetricsService(memStorage)
 
-	mainPageHandler := handler.NewMainPageHandler(memStorage, mainPageTemplate)
+	mainPageHandler := handler.NewMainPageHandler(metricsService, mainPageTemplate)
 	updateHandler := handler.NewUpdateMetricHandler(metricsService)
 	valueHandler := handler.NewValueMetricHandler(metricsService)
 

@@ -5,17 +5,17 @@ import (
 	"net/http"
 
 	models "github.com/VladimirB/gometrics/internal/model"
-	"github.com/VladimirB/gometrics/internal/repository"
+	"github.com/VladimirB/gometrics/internal/service"
 )
 
 type MainPageHandler struct {
-	storage  *repository.MemStorage
+	service  *service.MetricsService
 	template *template.Template
 }
 
-func NewMainPageHandler(storage *repository.MemStorage, template *template.Template) *MainPageHandler {
+func NewMainPageHandler(service *service.MetricsService, template *template.Template) *MainPageHandler {
 	return &MainPageHandler{
-		storage:  storage,
+		service:  service,
 		template: template,
 	}
 }
@@ -28,7 +28,7 @@ func (h MainPageHandler) GetMainPage() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		w.Header().Set("Content-Type", "text/html; charset=utf-8")
 
-		metrics := h.storage.GetAll()
+		metrics := h.service.GetAll()
 		pageData := MainPageData{
 			Metrics: metrics,
 		}

@@ -1,6 +1,8 @@
 package service
 
 import (
+	"fmt"
+
 	model "github.com/VladimirB/gometrics/internal/model"
 	"github.com/VladimirB/gometrics/internal/repository"
 )
@@ -27,6 +29,7 @@ func (s *MetricsService) Save(metric model.Metrics) error {
 		}
 	}
 
+	fmt.Println("Storage", s, metric)
 	s.storage.Save(metric.ID, metric)
 
 	return nil
@@ -52,4 +55,8 @@ func (s *MetricsService) SaveByFields(metricType string, metricID string, value 
 
 func (s *MetricsService) Get(metricID string) (model.Metrics, error) {
 	return s.storage.Get(metricID)
+}
+
+func (s *MetricsService) GetAll() map[string]model.Metrics {
+	return s.storage.GetAll()
 }

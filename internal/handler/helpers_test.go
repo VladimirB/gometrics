@@ -1,6 +1,7 @@
 package handler
 
 import (
+	"fmt"
 	"io"
 	"math/rand"
 	"net/http"
@@ -8,25 +9,13 @@ import (
 	"strings"
 	"testing"
 
-	models "github.com/VladimirB/gometrics/internal/model"
-	"github.com/VladimirB/gometrics/internal/repository"
 	"github.com/VladimirB/gometrics/internal/service"
 	"github.com/stretchr/testify/require"
 )
 
-func CreateTestServer() *httptest.Server {
-	memStorage := repository.NewMemStorage()
-	metricsService := service.NewMetricsService(memStorage)
-	mainPageHandler := NewMainPageHandler(memStorage, nil)
-	updateHandler := NewUpdateMetricHandler(metricsService)
-	valueHandler := NewValueMetricHandler(metricsService)
-	return httptest.NewServer(NewRouter(mainPageHandler, updateHandler, valueHandler))
-}
-
-func CreateTestServerWithStorage(storage *repository.MemStorage) *httptest.Server {
-	memStorage := storage
-	metricsService := service.NewMetricsService(memStorage)
-	mainPageHandler := NewMainPageHandler(memStorage, nil)
+func CreateTestServer(service *service.MetricsService) *httptest.Server {
+	metricsService := service
+	mainPageHandler := NewMainPageHandler(metricsService, nil)
 	updateHandler := NewUpdateMetricHandler(metricsService)
 	valueHandler := NewValueMetricHandler(metricsService)
 	return httptest.NewServer(NewRouter(mainPageHandler, updateHandler, valueHandler))
@@ -52,18 +41,6 @@ func MakeTestRequest(t *testing.T, ts *httptest.Server, method string, path stri
 	return resp, string(respBody)
 }
 
-func PrepareTestData(service *service.MetricsService) map[string]float64 {
-	var result = make(map[string]float64)
-
-	for metricID := range models.AllowedMetrics {
-		if metricID == models.PollCount {
-			result[metricID] = float64(rand.Int())
-			service.SaveByFields(models.Counter, metricID, result[metricID])
-		} else {
-			result[metricID] = rand.Float64()
-			service.SaveByFields(models.Gauge, metricID, result[metricID])
-		}
-	}
-
-	return result
+func GenTestID() string {
+	return fmt.Sprintf("TestID%d", rand.Intn(1024))
 }
