@@ -20,11 +20,11 @@
             <th>Type</th>
             <th>Value</th>
         </tr>
-        {{range $key, $value := .Metrics}}
+        {{range $i, $raw := .Raws}}
         <tr>
-            <td>{{$key}}</td>
-            <td>{{$value.MType}}</td>
-            <td>{{$value.Value}}</td>
+            <td>{{$raw.ID}}</td>
+            <td>{{$raw.Type}}</td>
+            <td>{{$raw.Value}}</td>
         </tr>
         {{end}}
         </table>

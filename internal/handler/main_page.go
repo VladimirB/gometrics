@@ -1,6 +1,7 @@
 package handler
 
 import (
+	"fmt"
 	"html/template"
 	"net/http"
 
@@ -20,8 +21,13 @@ func NewMainPageHandler(service *service.MetricsService, template *template.Temp
 	}
 }
 
+type Raw struct {
+	ID string
+	Type string
+	Value string
+}
 type MainPageData struct {
-	Metrics map[string]models.Metrics
+	Raws []Raw
 }
 
 func (h MainPageHandler) GetMainPage() http.HandlerFunc {
@@ -29,8 +35,24 @@ func (h MainPageHandler) GetMainPage() http.HandlerFunc {
 		w.Header().Set("Content-Type", "text/html; charset=utf-8")
 
 		metrics := h.service.GetAll()
+
+		var raws []Raw
+		for _, m := range metrics {
+			raw := Raw{
+				ID: m.ID,
+				Type: m.MType,
+			}
+
+			if m.MType == models.Counter {
+				raw.Value = fmt.Sprint(*m.Delta)
+			} else {
+				raw.Value = fmt.Sprint(*m.Value)
+			}
+
+			raws = append(raws, raw)
+		}
 		pageData := MainPageData{
-			Metrics: metrics,
+			Raws: raws,
 		}
 
 		err := h.template.Execute(w, pageData)
