@@ -113,10 +113,10 @@ func TestValueMetricHandler_PostValueMetricHandlerGzip(t *testing.T) {
 	counterID := handler.GenTestID()
 	metricsService.SaveByFields(models.Counter, counterID, 1000)
 
-	t.Run("send gzip", func(t *testing.T) {
-		requestBody := fmt.Sprintf(`{"id":"%s", "type":"counter"}`, counterID)
-		expectedResponse := fmt.Sprintf(`{"id":"%s", "type":"counter", "delta":%d}`, counterID, 1000)
+	requestBody := fmt.Sprintf(`{"id":"%s", "type":"counter"}`, counterID)
+	expectedResponse := fmt.Sprintf(`{"id":"%s", "type":"counter", "delta":%d}`, counterID, 1000)
 
+	t.Run("send gzip", func(t *testing.T) {
 		compressedRequest, err := compress.Zip([]byte(requestBody))
 		require.NoError(t, err)
 
@@ -130,5 +130,9 @@ func TestValueMetricHandler_PostValueMetricHandlerGzip(t *testing.T) {
 		if response.StatusCode() == http.StatusOK {
 			assert.JSONEq(t, expectedResponse, string(response.Body()))
 		}
+	})
+
+	t.Run("accept gzip", func(t *testing.T) {
+		
 	})
 }
