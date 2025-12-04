@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"compress/gzip"
 	"fmt"
+	"io"
 )
 
 func Zip(data []byte) ([]byte, error) {
@@ -22,13 +23,13 @@ func Zip(data []byte) ([]byte, error) {
 	return buf.Bytes(), nil
 }
 
-func Unzip(data []byte) (int, error) {
-	temp := bytes.NewReader(data)
-	r, err := gzip.NewReader(temp)
+func Unzip(data []byte) ([]byte, error) {
+	reader := bytes.NewReader(data)
+	gzReader, err := gzip.NewReader(reader)
 	if err != nil {
-		return 0, err
+		return nil, err
 	}
-	defer r.Close()
+	defer gzReader.Close()
 
-	return r.Read(data)
+	return io.ReadAll(gzReader)
 }

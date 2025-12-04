@@ -2,7 +2,6 @@ package middleware
 
 import (
 	"compress/gzip"
-	"fmt"
 	"io"
 	"net/http"
 	"strings"
@@ -79,13 +78,11 @@ func GZip(h http.HandlerFunc) http.HandlerFunc {
 			h.ServeHTTP(w, r)
 			return
 		}
-		fmt.Println("Server: Content-Type", contentType)
 
 		usedWriter := w
 
 		// Если клиент поддерживает прием gzip, то устанавлияваем gzip writer как основной
 		acceptEncoding := r.Header.Get("Accept-Encoding")
-		fmt.Println("Server: Accept-Encoding", acceptEncoding)
 		if strings.Contains(acceptEncoding, "gzip") {
 			gzw := NewGZipWriter(w)
 			usedWriter = gzw
@@ -94,7 +91,6 @@ func GZip(h http.HandlerFunc) http.HandlerFunc {
 
 		// Если клиент отправляет нам gzip, то используем reader с поддержкой декомпрессии
 		contentEncoding := r.Header.Get("Content-Encoding")
-		fmt.Println("Server: Content-Encoding", contentEncoding)
 		if strings.Contains(contentEncoding, "gzip") {
 			gzr, err := NewGZipReader(r.Body)
 			if err != nil {

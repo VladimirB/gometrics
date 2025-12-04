@@ -133,6 +133,17 @@ func TestValueMetricHandler_PostValueMetricHandlerGzip(t *testing.T) {
 	})
 
 	t.Run("accept gzip", func(t *testing.T) {
-		
+		response, err := httpClient.R().
+			SetHeader("Accept-Encoding", "gzip").
+			SetBody(requestBody).
+			Post(testServer.URL + "/value")
+		require.NoError(t, err)
+
+		assert.Equal(t, http.StatusOK, response.StatusCode())
+		if response.StatusCode() == http.StatusOK {
+			decompressedResponse, err := compress.Unzip(response.Body())
+			require.NoError(t, err)
+			assert.JSONEq(t, expectedResponse, string(decompressedResponse))
+		}
 	})
 }
