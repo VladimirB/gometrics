@@ -1,9 +1,9 @@
 package handler
 
 import (
-	"bytes"
 	"encoding/json"
 	"fmt"
+	"io"
 	"net/http"
 
 	"github.com/VladimirB/gometrics/internal/logger"
@@ -48,22 +48,26 @@ func (h ValueMetricHandler) GetMetricHandler() http.HandlerFunc {
 
 func (h ValueMetricHandler) PostValueMetricHandler() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-		var buffer bytes.Buffer
-		if _, err := buffer.ReadFrom(r.Body); err != nil {
-			logger.Log.Error("cant read request body", zap.Error(err))
+		var buffer []byte
+		buffer, err := io.ReadAll(r.Body)
+		if err != nil {
+			logger.Log.Info("cant read request body", zap.Error(err))
+			fmt.Println("Cant read request body", err)
 			http.Error(w, err.Error(), http.StatusBadRequest)
 			return
 		}
 
 		var askedMetric models.Metrics
-		if err := json.Unmarshal(buffer.Bytes(), &askedMetric); err != nil {
+		if err := json.Unmarshal(buffer, &askedMetric); err != nil {
 			logger.Log.Error("cant unmarshal metric to JSON", zap.Error(err))
+			fmt.Println("Cant unmarshal metric to JSON", err)
 			http.Error(w, err.Error(), http.StatusBadRequest)
 			return
 		}
 
 		if err := askedMetric.Validate(); err != nil {
-			logger.Log.Error("asked metric invalid", zap.Error(err), zap.String("metric", askedMetric.String()))
+			logger.Log.Info("asked metric invalid", zap.Error(err), zap.String("metric", askedMetric.String()))
+			fmt.Println("Validation Error", err)
 			http.Error(w, err.Error(), http.StatusBadRequest)
 			return
 		}

@@ -1,8 +1,6 @@
 package service
 
 import (
-	"fmt"
-
 	model "github.com/VladimirB/gometrics/internal/model"
 	"github.com/VladimirB/gometrics/internal/repository"
 )
@@ -29,7 +27,6 @@ func (s *MetricsService) Save(metric model.Metrics) error {
 		}
 	}
 
-	fmt.Println("Storage", s, metric)
 	s.storage.Save(metric.ID, metric)
 
 	return nil

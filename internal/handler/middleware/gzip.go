@@ -60,7 +60,7 @@ func (c *GZipWriter) Close() error {
 	return c.zw.Close()
 }
 
-func (c GZipReader) Read(p []byte) (n int, err error) {
+func (c *GZipReader) Read(p []byte) (n int, err error) {
 	return c.zr.Read(p)
 }
 
@@ -86,11 +86,11 @@ func GZip(h http.HandlerFunc) http.HandlerFunc {
 		// Если клиент поддерживает прием gzip, то устанавлияваем gzip writer как основной
 		acceptEncoding := r.Header.Get("Accept-Encoding")
 		fmt.Println("Server: Accept-Encoding", acceptEncoding)
-		// if strings.Contains(acceptEncoding, "gzip") {
-		// 	gzw := NewGZipWriter(w)
-		// 	usedWriter = gzw
-		// 	defer gzw.Close()
-		// }
+		if strings.Contains(acceptEncoding, "gzip") {
+			gzw := NewGZipWriter(w)
+			usedWriter = gzw
+			defer gzw.Close()
+		}
 
 		// Если клиент отправляет нам gzip, то используем reader с поддержкой декомпрессии
 		contentEncoding := r.Header.Get("Content-Encoding")
@@ -98,14 +98,12 @@ func GZip(h http.HandlerFunc) http.HandlerFunc {
 		if strings.Contains(contentEncoding, "gzip") {
 			gzr, err := NewGZipReader(r.Body)
 			if err != nil {
-				logger.Log.Error("cant read body as gzip", zap.Error(err))
+				logger.Log.Info("cant read body as gzip", zap.Error(err))
 				w.WriteHeader(http.StatusInternalServerError)
 				return
 			}
 
 			r.Body = gzr
-
-			defer gzr.Close()
 		}
 
 		h.ServeHTTP(usedWriter, r)

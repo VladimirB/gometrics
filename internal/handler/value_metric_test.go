@@ -8,6 +8,7 @@ import (
 	"testing"
 	"time"
 
+	"github.com/VladimirB/gometrics/internal/compress"
 	"github.com/VladimirB/gometrics/internal/handler"
 	models "github.com/VladimirB/gometrics/internal/model"
 	"github.com/VladimirB/gometrics/internal/repository"
@@ -26,6 +27,7 @@ func setup() {
 
 	httpClient = resty.New().SetTimeout(3 * time.Second)
 	httpClient.SetHeader("Content-Type", "application/json")
+	httpClient.SetHeader("Accept-Encoding", "")
 
 	storage := repository.NewMemStorage()
 	metricsService = service.NewMetricsService(storage)
@@ -105,4 +107,28 @@ func TestValueMetricHandler_PostValueMetricHandler(t *testing.T) {
 			}
 		})
 	}
+}
+
+func TestValueMetricHandler_PostValueMetricHandlerGzip(t *testing.T) {
+	counterID := handler.GenTestID()
+	metricsService.SaveByFields(models.Counter, counterID, 1000)
+
+	t.Run("send gzip", func(t *testing.T) {
+		requestBody := fmt.Sprintf(`{"id":"%s", "type":"counter"}`, counterID)
+		expectedResponse := fmt.Sprintf(`{"id":"%s", "type":"counter", "delta":%d}`, counterID, 1000)
+
+		compressedRequest, err := compress.Zip([]byte(requestBody))
+		require.NoError(t, err)
+
+		response, err := httpClient.R().
+			SetHeader("Content-Encoding", "gzip").
+			SetBody(compressedRequest).
+			Post(testServer.URL + "/value")
+		require.NoError(t, err)
+
+		assert.Equal(t, http.StatusOK, response.StatusCode())
+		if response.StatusCode() == http.StatusOK {
+			assert.JSONEq(t, expectedResponse, string(response.Body()))
+		}
+	})
 }
