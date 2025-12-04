@@ -12,7 +12,7 @@ func NewRouter(mainPageHandler *MainPageHandler,
 	router := chi.NewRouter()
 
 	router.Route("/", func(r chi.Router) {
-		r.Get("/", RequestLogger(mainPageHandler.GetMainPage()))
+		r.Get("/", RequestLogger(middleware.GZip(mainPageHandler.GetMainPage())))
 
 		r.Route("/update", func(r chi.Router) {
 			r.Post("/", RequestLogger(middleware.GZip(updateHandler.UpdateMetricJSONHandler())))
