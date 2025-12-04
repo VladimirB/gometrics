@@ -25,14 +25,16 @@ var testServer *httptest.Server
 func setup() {
 	fmt.Println("Setup tests")
 
-	httpClient = resty.New().SetTimeout(3 * time.Second)
-	httpClient.SetHeader("Content-Type", "application/json")
-	httpClient.SetHeader("Accept-Encoding", "")
-
 	storage := repository.NewMemStorage()
 	metricsService = service.NewMetricsService(storage)
 
 	testServer = handler.CreateTestServer(metricsService)
+
+	httpClient = resty.New().
+		SetTimeout(3*time.Second).
+		SetBaseURL(testServer.URL).
+		SetHeader("Content-Type", "application/json").
+		SetHeader("Accept-Encoding", "")
 }
 
 func tearDown() {
@@ -66,7 +68,7 @@ func TestValueMetricHandler_GetMetricHandler(t *testing.T) {
 
 	for _, tt := range testTable {
 		t.Run(tt.name, func(t *testing.T) {
-			response, _ := httpClient.R().Get(testServer.URL + tt.path)
+			response, _ := httpClient.R().Get(tt.path)
 
 			assert.Equal(t, tt.statusCode, response.StatusCode())
 			if response.StatusCode() == http.StatusOK {
@@ -98,7 +100,7 @@ func TestValueMetricHandler_PostValueMetricHandler(t *testing.T) {
 		t.Run(tt.name, func(t *testing.T) {
 			response, err := httpClient.R().
 				SetBody(tt.body).
-				Post(testServer.URL + "/value")
+				Post("/value")
 
 			require.NoError(t, err)
 			assert.Equal(t, tt.statusCode, response.StatusCode())
@@ -123,7 +125,7 @@ func TestValueMetricHandler_PostValueMetricHandlerGzip(t *testing.T) {
 		response, err := httpClient.R().
 			SetHeader("Content-Encoding", "gzip").
 			SetBody(compressedRequest).
-			Post(testServer.URL + "/value")
+			Post("/value")
 		require.NoError(t, err)
 
 		assert.Equal(t, http.StatusOK, response.StatusCode())
@@ -136,7 +138,7 @@ func TestValueMetricHandler_PostValueMetricHandlerGzip(t *testing.T) {
 		response, err := httpClient.R().
 			SetHeader("Accept-Encoding", "gzip").
 			SetBody(requestBody).
-			Post(testServer.URL + "/value")
+			Post("/value")
 		require.NoError(t, err)
 
 		assert.Equal(t, http.StatusOK, response.StatusCode())
