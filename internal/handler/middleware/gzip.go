@@ -48,10 +48,6 @@ func (c *GZipWriter) Write(p []byte) (int, error) {
 }
 
 func (c *GZipWriter) WriteHeader(statusCode int) {
-	if statusCode < 300 {
-		c.w.Header().Set("Content-Encoding", "gzip")
-	}
-
 	c.w.WriteHeader(statusCode)
 }
 
@@ -86,6 +82,7 @@ func GZip(h http.HandlerFunc) http.HandlerFunc {
 		if strings.Contains(acceptEncoding, "gzip") {
 			gzw := NewGZipWriter(w)
 			usedWriter = gzw
+			usedWriter.Header().Set("Content-Encoding", "gzip")
 			defer gzw.Close()
 		}
 

@@ -33,8 +33,7 @@ func setup() {
 	httpClient = resty.New().
 		SetTimeout(3*time.Second).
 		SetBaseURL(testServer.URL).
-		SetHeader("Content-Type", "application/json").
-		SetHeader("Accept-Encoding", "")
+		SetHeader("Content-Type", "application/json")
 }
 
 func tearDown() {
@@ -142,10 +141,10 @@ func TestValueMetricHandler_PostValueMetricHandlerGzip(t *testing.T) {
 		require.NoError(t, err)
 
 		assert.Equal(t, http.StatusOK, response.StatusCode())
+		assert.Equal(t, "gzip", response.Header().Get("Content-Encoding"))
 		if response.StatusCode() == http.StatusOK {
-			decompressedResponse, err := compress.Unzip(response.Body())
-			require.NoError(t, err)
-			assert.JSONEq(t, expectedResponse, string(decompressedResponse))
+			assert.JSONEq(t, expectedResponse, string(response.Body()))
+
 		}
 	})
 }
