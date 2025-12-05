@@ -70,7 +70,7 @@ func GZip(h http.HandlerFunc) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		// Сжатие работает только для указанных типов контента
 		contentType := r.Header.Get("Content-Type")
-		if !strings.Contains(contentType, "application/json") && !strings.Contains(contentType, "text/html") {
+		if !strings.Contains(contentType, "application/json") && contentType != "" {
 			h.ServeHTTP(w, r)
 			return
 		}
