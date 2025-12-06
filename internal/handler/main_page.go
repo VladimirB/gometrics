@@ -22,8 +22,8 @@ func NewMainPageHandler(service *service.MetricsService, template *template.Temp
 }
 
 type Raw struct {
-	ID string
-	Type string
+	ID    string
+	Type  string
 	Value string
 }
 
@@ -51,7 +51,7 @@ func preparePageData(metrics map[string]models.Metrics) MainPageData {
 	var raws []Raw
 	for _, m := range metrics {
 		raw := Raw{
-			ID: m.ID,
+			ID:   m.ID,
 			Type: m.MType,
 		}
 
