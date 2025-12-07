@@ -73,7 +73,7 @@ func initMetricsFromFile(fileName string, metricsService *service.MetricsService
 }
 
 func runStoreInFileTicker(config config.ServerConfig, service *service.MetricsService) {
-	storeInFileTicker := time.NewTicker(config.StoreInterval)
+	storeInFileTicker := time.NewTicker(time.Duration(config.StoreInterval) * time.Second)
 	defer storeInFileTicker.Stop()
 
 	for tick := range storeInFileTicker.C {

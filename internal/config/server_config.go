@@ -2,11 +2,11 @@ package config
 
 import (
 	"flag"
-	"log"
 	"os"
-	"time"
 
+	"github.com/VladimirB/gometrics/internal/logger"
 	"github.com/caarlos0/env/v6"
+	"go.uber.org/zap"
 )
 
 const (
@@ -17,10 +17,10 @@ const (
 )
 
 type ServerConfig struct {
-	Address         string        `env:"ADDRESS"`           // адрес сервера
-	StoreInterval   time.Duration `env:"STORE_INTERVAL"`    // интервал записи метрик на диск в секундах
-	FileStoragePath string        `env:"FILE_STORAGE_PATH"` // путь до файла для записи метрик
-	Restore         bool          `env:"RESTORE"`           // флаг, инициализировать ли значения метрик из файла на старте сервера
+	Address         string  `env:"ADDRESS"`           // адрес сервера
+	StoreInterval   int     `env:"STORE_INTERVAL"`    // интервал записи метрик на диск в секундах
+	FileStoragePath string  `env:"FILE_STORAGE_PATH"` // путь до файла для записи метрик
+	Restore         bool    `env:"RESTORE"`           // флаг, инициализировать ли значения метрик из файла на старте сервера
 }
 
 type serverFlags struct {
@@ -33,7 +33,7 @@ type serverFlags struct {
 func GetServerConfig() ServerConfig {
 	config := ServerConfig{}
 	if err := env.Parse(&config); err != nil {
-		log.Println(err)
+		logger.Log.Error("Cant parse envs", zap.Error(err))
 	}
 
 	flags := parseServerFlags()
@@ -43,7 +43,7 @@ func GetServerConfig() ServerConfig {
 	}
 
 	if config.StoreInterval == 0 {
-		config.StoreInterval = time.Duration(flags.storeInterval) * time.Second
+		config.StoreInterval = flags.storeInterval
 	}
 
 	if config.FileStoragePath == "" {
