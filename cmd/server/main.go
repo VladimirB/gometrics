@@ -33,6 +33,12 @@ func main() {
 	memStorage := repository.NewMemStorage()
 	metricsService := service.NewMetricsService(memStorage)
 
+	// Если в конфигурации установлен флаг Restore, необходимо прочитать значения метрик из файла (путь в конфиге)
+	// и инициализировать хранилище метрик прочитанными значениями
+	if config.Restore {
+		initMetricsFromFile(config.FileStoragePath, metricsService)
+	}
+
 	go runStoreInFileTicker(config, metricsService)
 
 	mainPageTemplate := template.Must(template.ParseFS(templateFiles, "web/template/index.html"))
@@ -45,6 +51,25 @@ func main() {
 	}
 }
 
+func initMetricsFromFile(fileName string, metricsService *service.MetricsService) {
+	jsonFileReader, err := repository.NewMetricsFileReader(fileName)
+	if err != nil {
+		logger.Log.Error("Cant open file to read metrics", zap.Error(err))
+	}
+
+	result, err := jsonFileReader.Read()
+	if err != nil {
+		logger.Log.Error("Cant read metrics from file", zap.Error(err))
+	}
+
+	for _, m := range result {
+		err := metricsService.Save(m)
+		if err != nil {
+			logger.Log.Error("Error on save metric", zap.Error(err), zap.String("Metric", m.String()))
+		}
+	}
+}
+
 func runStoreInFileTicker(config config.ServerConfig, service *service.MetricsService) {
 	storeInFileTicker := time.NewTicker(config.StoreInterval)
 	defer storeInFileTicker.Stop()
@@ -54,14 +79,19 @@ func runStoreInFileTicker(config config.ServerConfig, service *service.MetricsSe
 		case <-storeInFileTicker.C:
 			logger.Log.Info("Write metrics to file")
 
-			fileWriter, err := repository.NewJsonFileWriter(config.FileStoragePath)
+			currentMetrics := service.GetAll()
+			if len(currentMetrics) == 0 {
+				return
+			}
+
+			fileWriter, err := repository.NewMetricsFileWriter(config.FileStoragePath)
 			if err != nil {
 				logger.Log.Fatal("Cant initialize metrics file writer", zap.Error(err))
 			}
 			defer fileWriter.Close()
 
 			var metrics = make([]models.Metrics, 0)
-			for _, value := range service.GetAll() {
+			for _, value := range currentMetrics {
 				metrics = append(metrics, value)
 			}
 
