@@ -11,7 +11,7 @@ import (
 
 const (
 	defaultServerAddress   = "localhost:8080"
-	defaultStoreInterval   = 5
+	defaultStoreInterval   = 300
 	defaultFileStoragePath = "metrics.json"
 	defaultRestore         = true
 )
