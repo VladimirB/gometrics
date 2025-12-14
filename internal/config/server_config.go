@@ -17,10 +17,10 @@ const (
 )
 
 type ServerConfig struct {
-	Address         string  `env:"ADDRESS"`           // адрес сервера
-	StoreInterval   int     `env:"STORE_INTERVAL"`    // интервал записи метрик на диск в секундах
-	FileStoragePath string  `env:"FILE_STORAGE_PATH"` // путь до файла для записи метрик
-	Restore         bool    `env:"RESTORE"`           // флаг, инициализировать ли значения метрик из файла на старте сервера
+	Address         string `env:"ADDRESS"`           // адрес сервера
+	StoreInterval   int    `env:"STORE_INTERVAL"`    // интервал записи метрик на диск в секундах
+	FileStoragePath string `env:"FILE_STORAGE_PATH"` // путь до файла для записи метрик
+	Restore         bool   `env:"RESTORE"`           // флаг, инициализировать ли значения метрик из файла на старте сервера
 }
 
 type serverFlags struct {

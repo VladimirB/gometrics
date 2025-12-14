@@ -77,7 +77,7 @@ func runStoreInFileTicker(config config.ServerConfig, service *service.MetricsSe
 	defer storeInFileTicker.Stop()
 
 	for tick := range storeInFileTicker.C {
-        logger.Log.Info("Write metrics to file", zap.Any("Seconds from start", tick.Second()))
+		logger.Log.Info("Write metrics to file", zap.Any("Seconds from start", tick.Second()))
 
 		currentMetrics := service.GetAll()
 		if len(currentMetrics) == 0 {
@@ -100,5 +100,5 @@ func runStoreInFileTicker(config config.ServerConfig, service *service.MetricsSe
 			logger.Log.Error("Error on metrics write to file", zap.Error(err))
 		}
 		fileWriter.Close()
-    }
+	}
 }

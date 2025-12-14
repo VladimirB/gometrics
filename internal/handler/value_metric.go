@@ -32,17 +32,20 @@ func (h ValueMetricHandler) GetMetricHandler() http.HandlerFunc {
 		}
 
 		metricName := chi.URLParam(r, "metricName")
-		if metric, err := h.metricsService.Get(metricName); err != nil {
+		metric, err := h.metricsService.Get(metricName)
+		if err != nil {
 			http.Error(w, err.Error(), http.StatusNotFound)
 			return
-		} else {
-			if metric.MType == models.Counter {
-				w.Write([]byte(fmt.Sprint(*metric.Delta)))
-			} else {
-				w.Write([]byte(fmt.Sprint(*metric.Value)))
-			}
-			w.WriteHeader(http.StatusOK)
 		}
+
+		switch metric.MType {
+		case models.Counter:
+			w.Write([]byte(fmt.Sprint(*metric.Delta)))
+		case models.Gauge:
+			w.Write([]byte(fmt.Sprint(*metric.Value)))
+		}
+
+		w.WriteHeader(http.StatusOK)
 	}
 }
 

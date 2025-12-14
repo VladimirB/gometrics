@@ -44,15 +44,16 @@ func (h UpdateMetricHandler) UpdateMetricJSONHandler() http.HandlerFunc {
 			return
 		}
 
-		if resp, err := json.Marshal(metric); err != nil {
+		resp, err := json.Marshal(metric)
+		if err != nil {
 			logger.Log.Info("error marshaling metric", zap.String("Metric", metric.String()))
 			http.Error(w, err.Error(), http.StatusInternalServerError)
 			return
-		} else {
-			w.Header().Set("Content-Type", "application/json")
-			w.Write(resp)
-			w.WriteHeader(http.StatusOK)
 		}
+
+		w.Header().Set("Content-Type", "application/json")
+		w.Write(resp)
+		w.WriteHeader(http.StatusOK)
 	}
 }
 
