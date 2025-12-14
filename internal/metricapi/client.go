@@ -50,15 +50,8 @@ func (c Client) SendAsJSON(server string, metric models.Metrics) error {
 		return err
 	}
 
-	// compressedBody, err := compress.Zip(body)
-	// if err != nil {
-	// 	return err
-	// }
-
 	response, err := c.client.R().
 		SetHeader("Content-Type", "application/json").
-		// SetHeader("Content-Encoding", "gzip").
-		// SetHeader("Accept-Encoding", "gzip").
 		SetBody(body).
 		Post(fmt.Sprintf("http://%s/update", server))
 	if err != nil {
