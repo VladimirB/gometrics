@@ -1,8 +1,8 @@
 package handler
 
 import (
+	"github.com/VladimirB/gometrics/internal/handler/middleware"
 	"github.com/go-chi/chi/v5"
-	"github.com/go-chi/chi/v5/middleware"
 )
 
 func NewRouter(mainPageHandler *MainPageHandler,
@@ -11,18 +11,18 @@ func NewRouter(mainPageHandler *MainPageHandler,
 
 	router := chi.NewRouter()
 
-	router.Use(middleware.Logger)
-
 	router.Route("/", func(r chi.Router) {
-		r.Get("/", mainPageHandler.GetMainPage())
+		r.Get("/", RequestLogger(middleware.GZip(mainPageHandler.GetMainPage())))
 
 		r.Route("/update", func(r chi.Router) {
-			r.Post("/{metricType}/{metricValue}", updateHandler.PostMetricNoNameHandler())
-			r.Post("/{metricType}/{metricName}/{metricValue}", updateHandler.PostMetricHandler())
+			r.Post("/", RequestLogger(middleware.GZip(updateHandler.UpdateMetricJSONHandler())))
+			r.Post("/{metricType}/{metricValue}", RequestLogger(updateHandler.UpdateNoNameMetricHandler()))
+			r.Post("/{metricType}/{metricName}/{metricValue}", RequestLogger(updateHandler.UpdateMetricByNameHandler()))
 		})
 
 		r.Route("/value", func(r chi.Router) {
-			r.Get("/{metricType}/{metricName}", valueHandler.GetMetricHandler())
+			r.Post("/", RequestLogger(middleware.GZip(valueHandler.PostValueMetricHandler())))
+			r.Get("/{metricType}/{metricName}", RequestLogger(valueHandler.GetMetricHandler()))
 		})
 	})
 

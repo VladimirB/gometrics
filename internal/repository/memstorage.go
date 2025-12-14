@@ -17,10 +17,6 @@ func NewMemStorage() *MemStorage {
 }
 
 func (ms *MemStorage) Save(metricName string, metric models.Metrics) {
-	// Выглядит как кусок бизнес-логики. Поискать другое место под это
-	if m, ok := ms.storage[metricName]; ok && metric.MType == models.Counter {
-		*metric.Value += *m.Value
-	}
 	ms.storage[metricName] = metric
 }
 

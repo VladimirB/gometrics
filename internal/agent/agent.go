@@ -1,11 +1,13 @@
 package agent
 
 import (
-	"log"
+	"errors"
 	"math/rand"
 	"runtime"
 
+	"github.com/VladimirB/gometrics/internal/logger"
 	model "github.com/VladimirB/gometrics/internal/model"
+	"go.uber.org/zap"
 )
 
 type Agent struct {
@@ -14,6 +16,7 @@ type Agent struct {
 
 type MetricSender interface {
 	Send(destination string, metric model.Metrics) error
+	SendAsJSON(destination string, metric model.Metrics) error
 }
 
 func NewAgent(sender MetricSender) *Agent {
@@ -40,6 +43,8 @@ func (Agent) ReadMetrics(metrics map[string]model.Metrics) {
 	fill(metrics, model.Gauge, model.LastGC, float64(stats.LastGC))
 	fill(metrics, model.Gauge, model.Lookups, float64(stats.Lookups))
 	fill(metrics, model.Gauge, model.MCacheInuse, float64(stats.MCacheInuse))
+	fill(metrics, model.Gauge, model.MCacheSys, float64(stats.MCacheSys))
+	fill(metrics, model.Gauge, model.MSpanInuse, float64(stats.MSpanInuse))
 	fill(metrics, model.Gauge, model.MSpanSys, float64(stats.MSpanSys))
 	fill(metrics, model.Gauge, model.Mallocs, float64(stats.Mallocs))
 	fill(metrics, model.Gauge, model.NextGC, float64(stats.NextGC))
@@ -56,7 +61,7 @@ func (Agent) ReadMetrics(metrics map[string]model.Metrics) {
 	var counter = 0
 	pollCount, ok := metrics[model.PollCount]
 	if ok {
-		counter = int(*pollCount.Value)
+		counter = int(*pollCount.Delta)
 	}
 	counter++
 	fill(metrics, model.Counter, model.PollCount, float64(counter))
@@ -68,25 +73,32 @@ func fill(metrics map[string]model.Metrics, metricType string, metricName string
 		metric = model.Metrics{
 			ID:    metricName,
 			MType: metricType,
-			Value: new(float64),
-			Delta: nil,
 		}
+
+		if metricType == model.Counter {
+			metric.Delta = new(int64)
+		} else {
+			metric.Value = new(float64)
+		}
+
 		metrics[metricName] = metric
 	}
 
-	*metric.Value = value
+	if metricType == model.Counter {
+		*metric.Delta = int64(value)
+	} else {
+		*metric.Value = value
+	}
 }
 
-func (a Agent) SendMetrics(server string, metrics map[string]model.Metrics) {
-	var dropCounter = true
+func (a Agent) SendMetrics(server string, metrics map[string]model.Metrics) error {
 	for _, metric := range metrics {
-		if err := a.metricSender.Send(server, metric); err != nil {
-			log.Println(err)
-			dropCounter = false
+		if err := a.metricSender.SendAsJSON(server, metric); err != nil {
+			logger.Log.Error("error on metric send", zap.Error(err), zap.String("Metric", metric.String()))
+			fill(metrics, model.Counter, model.PollCount, 0)
+			return errors.New("error on metric send")
 		}
 	}
 
-	if dropCounter {
-		fill(metrics, model.Counter, model.PollCount, 0)
-	}
+	return nil
 }

@@ -1,34 +1,35 @@
 package handler
 
 import (
+	"fmt"
 	"io"
+	"math/rand"
 	"net/http"
 	"net/http/httptest"
+	"strings"
 	"testing"
 
-	"github.com/VladimirB/gometrics/internal/repository"
+	"github.com/VladimirB/gometrics/internal/service"
 	"github.com/stretchr/testify/require"
 )
 
-func CreateTestServer() *httptest.Server {
-	memStorage := repository.NewMemStorage()
-	mainPageHandler := NewMainPageHandler(memStorage, nil)
-	updateHandler := NewUpdateMetricHandler(memStorage)
-	valueHandler := NewValueMetricHandler(memStorage)
+func CreateTestServer(service *service.MetricsService) *httptest.Server {
+	metricsService := service
+	mainPageHandler := NewMainPageHandler(metricsService, nil)
+	updateHandler := NewUpdateMetricHandler(metricsService)
+	valueHandler := NewValueMetricHandler(metricsService)
 	return httptest.NewServer(NewRouter(mainPageHandler, updateHandler, valueHandler))
 }
 
-func CreateTestServerWithStorage(storage *repository.MemStorage) *httptest.Server {
-	memStorage := storage
-	mainPageHandler := NewMainPageHandler(memStorage, nil)
-	updateHandler := NewUpdateMetricHandler(memStorage)
-	valueHandler := NewValueMetricHandler(memStorage)
-	return httptest.NewServer(NewRouter(mainPageHandler, updateHandler, valueHandler))
-}
+func MakeTestRequest(t *testing.T, ts *httptest.Server, method string, path string, body string) (*http.Response, string) {
+	var br io.Reader
+	if body != "" {
+		br = strings.NewReader(body)
+	}
 
-func MakeTestRequest(t *testing.T, ts *httptest.Server, method string, path string) (*http.Response, string) {
-	req, err := http.NewRequest(method, ts.URL+path, nil)
+	req, err := http.NewRequest(method, ts.URL+path, br)
 	require.NoError(t, err)
+	req.Header.Set("Content-Type", "application/json")
 
 	resp, err := ts.Client().Do(req)
 	require.NoError(t, err)
@@ -38,4 +39,8 @@ func MakeTestRequest(t *testing.T, ts *httptest.Server, method string, path stri
 	require.NoError(t, err)
 
 	return resp, string(respBody)
+}
+
+func GenTestID() string {
+	return fmt.Sprintf("TestID%d", rand.Intn(1024))
 }
