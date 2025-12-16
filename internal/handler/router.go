@@ -7,7 +7,8 @@ import (
 
 func NewRouter(mainPageHandler *MainPageHandler,
 	updateHandler *UpdateMetricHandler,
-	valueHandler *ValueMetricHandler) *chi.Mux {
+	valueHandler *ValueMetricHandler,
+	dbPingHandler *DatabasePingHandler) *chi.Mux {
 
 	router := chi.NewRouter()
 
@@ -24,6 +25,8 @@ func NewRouter(mainPageHandler *MainPageHandler,
 			r.Post("/", RequestLogger(middleware.GZip(valueHandler.PostValueMetricHandler())))
 			r.Get("/{metricType}/{metricName}", RequestLogger(valueHandler.GetMetricHandler()))
 		})
+
+		r.Get("/ping", RequestLogger(dbPingHandler.Ping))
 	})
 
 	return router

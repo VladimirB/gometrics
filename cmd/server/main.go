@@ -1,6 +1,7 @@
 package main
 
 import (
+	"database/sql"
 	"embed"
 	"html/template"
 	"log"
@@ -13,6 +14,7 @@ import (
 	models "github.com/VladimirB/gometrics/internal/model"
 	"github.com/VladimirB/gometrics/internal/repository"
 	"github.com/VladimirB/gometrics/internal/service"
+	_ "github.com/jackc/pgx/v5/stdlib"
 	"go.uber.org/zap"
 )
 
@@ -30,6 +32,12 @@ func main() {
 	config := config.GetServerConfig()
 	logger.Log.Info("Running Server", zap.String("Start time", time.Now().Local().String()), zap.Any("config", config))
 
+	db, err := sql.Open("pgx", config.DatabaseDSN)
+	if err != nil {
+		logger.Log.Error("DB connection is not well", zap.Error(err))
+	}
+	defer db.Close()
+
 	memStorage := repository.NewMemStorage()
 	metricsService := service.NewMetricsService(memStorage)
 
@@ -45,7 +53,8 @@ func main() {
 	mainPageHandler := handler.NewMainPageHandler(metricsService, mainPageTemplate)
 	updateHandler := handler.NewUpdateMetricHandler(metricsService)
 	valueHandler := handler.NewValueMetricHandler(metricsService)
-	err := http.ListenAndServe(config.Address, handler.NewRouter(mainPageHandler, updateHandler, valueHandler))
+	dbPingHandler := handler.NewDatabasePingHandler(db)
+	err = http.ListenAndServe(config.Address, handler.NewRouter(mainPageHandler, updateHandler, valueHandler, dbPingHandler))
 	if err != nil {
 		logger.Log.Fatal(err.Error())
 	}

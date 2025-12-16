@@ -21,7 +21,7 @@ type ServerConfig struct {
 	StoreInterval   int    `env:"STORE_INTERVAL"`    // интервал записи метрик на диск в секундах
 	FileStoragePath string `env:"FILE_STORAGE_PATH"` // путь до файла для записи метрик
 	Restore         bool   `env:"RESTORE"`           // флаг, инициализировать ли значения метрик из файла на старте сервера
-	DatabaseDSN	    string `env:"DATABASE_DSN"`      // строка для подключения к базе данных
+	DatabaseDSN     string `env:"DATABASE_DSN"`      // строка для подключения к базе данных
 }
 
 type serverFlags struct {
@@ -54,6 +54,10 @@ func GetServerConfig() ServerConfig {
 
 	if _, exists := os.LookupEnv("RESTORE"); !exists {
 		config.Restore = flags.restore
+	}
+
+	if config.DatabaseDSN == "" {
+		config.DatabaseDSN = flags.databaseDSN
 	}
 
 	return config
