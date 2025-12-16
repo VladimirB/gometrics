@@ -3,22 +3,31 @@ package handler
 import (
 	"fmt"
 	"io"
+	"log"
 	"math/rand"
 	"net/http"
 	"net/http/httptest"
 	"strings"
 	"testing"
 
+	"github.com/DATA-DOG/go-sqlmock"
 	"github.com/VladimirB/gometrics/internal/service"
 	"github.com/stretchr/testify/require"
 )
 
 func CreateTestServer(service *service.MetricsService) *httptest.Server {
+	db, _, err := sqlmock.New()
+    if err != nil {
+        log.Fatalf("Error on sqlmock creation: %s", err)
+    }
+    defer db.Close()
+
 	metricsService := service
 	mainPageHandler := NewMainPageHandler(metricsService, nil)
 	updateHandler := NewUpdateMetricHandler(metricsService)
 	valueHandler := NewValueMetricHandler(metricsService)
-	return httptest.NewServer(NewRouter(mainPageHandler, updateHandler, valueHandler))
+	dbPingHandler := NewDatabasePingHandler(db)
+	return httptest.NewServer(NewRouter(mainPageHandler, updateHandler, valueHandler, dbPingHandler))
 }
 
 func MakeTestRequest(t *testing.T, ts *httptest.Server, method string, path string, body string) (*http.Response, string) {
