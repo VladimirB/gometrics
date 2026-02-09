@@ -7,7 +7,7 @@ import (
 	"github.com/VladimirB/gometrics/internal/agent"
 	"github.com/VladimirB/gometrics/internal/config"
 	"github.com/VladimirB/gometrics/internal/shared/logger"
-	"github.com/VladimirB/gometrics/internal/metricapi"
+	"github.com/VladimirB/gometrics/internal/module/agent/adapter/http"
 	model "github.com/VladimirB/gometrics/internal/model"
 	"go.uber.org/zap"
 )
@@ -23,7 +23,7 @@ func main() {
 	logger.Log.Info("Running Agent", zap.String("Start time", time.Now().Local().String()))
 
 	metrics := make(map[string]model.Metrics)
-	agent := agent.NewAgent(metricapi.NewClient())
+	agent := agent.NewAgent(http.NewMetricApi())
 
 	cfg := config.GetAgentConfig()
 

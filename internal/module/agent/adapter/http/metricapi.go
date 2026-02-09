@@ -1,4 +1,4 @@
-package metricapi
+package http
 
 import (
 	"encoding/json"
@@ -13,17 +13,17 @@ import (
 	"go.uber.org/zap"
 )
 
-type Client struct {
+type MetricApi struct {
 	client *resty.Client
 }
 
-func NewClient() *Client {
-	return &Client{
+func NewMetricApi() *MetricApi {
+	return &MetricApi{
 		client: resty.New().SetTimeout(3 * time.Second),
 	}
 }
 
-func (c Client) Send(server string, metric models.Metrics) error {
+func (c MetricApi) Send(server string, metric models.Metrics) error {
 	response, err := c.client.R().
 		SetHeader("Content-Type", "text/plain").
 		SetPathParams(map[string]string{
@@ -44,7 +44,7 @@ func (c Client) Send(server string, metric models.Metrics) error {
 	return nil
 }
 
-func (c Client) SendAsJSON(server string, metric models.Metrics) error {
+func (c MetricApi) SendAsJSON(server string, metric models.Metrics) error {
 	body, err := json.Marshal(metric)
 	if err != nil {
 		return err
