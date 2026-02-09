@@ -1,31 +1,28 @@
-package agent
+package service
 
 import (
+	"context"
 	"errors"
 	"math/rand"
 	"runtime"
 
-	"github.com/VladimirB/gometrics/internal/shared/logger"
 	model "github.com/VladimirB/gometrics/internal/model"
+	"github.com/VladimirB/gometrics/internal/module/agent/port"
+	"github.com/VladimirB/gometrics/internal/shared/logger"
 	"go.uber.org/zap"
 )
 
-type Agent struct {
-	metricSender MetricSender
+type AgentService struct {
+	metricProvider port.MetricProvider
 }
 
-type MetricSender interface {
-	Send(destination string, metric model.Metrics) error
-	SendAsJSON(destination string, metric model.Metrics) error
-}
-
-func NewAgent(sender MetricSender) *Agent {
-	return &Agent{
-		metricSender: sender,
+func NewAgentService(metricProvider port.MetricProvider) *AgentService {
+	return &AgentService{
+		metricProvider: metricProvider,
 	}
 }
 
-func (Agent) ReadMetrics(metrics map[string]model.Metrics) {
+func (AgentService) ReadMetrics(metrics map[string]model.Metrics) {
 	var stats runtime.MemStats
 	runtime.ReadMemStats(&stats)
 
@@ -91,9 +88,9 @@ func fill(metrics map[string]model.Metrics, metricType string, metricName string
 	}
 }
 
-func (a Agent) SendMetrics(server string, metrics map[string]model.Metrics) error {
+func (a AgentService) SendMetrics(ctx context.Context, metrics map[string]model.Metrics) error {
 	for _, metric := range metrics {
-		if err := a.metricSender.SendAsJSON(server, metric); err != nil {
+		if err := a.metricProvider.SendAsJSON(ctx, metric); err != nil {
 			logger.Log.Error("error on metric send", zap.Error(err), zap.String("Metric", metric.String()))
 			fill(metrics, model.Counter, model.PollCount, 0)
 			return errors.New("error on metric send")

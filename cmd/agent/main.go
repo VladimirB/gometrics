@@ -1,14 +1,15 @@
 package main
 
 import (
+	"context"
 	"log"
 	"time"
 
-	"github.com/VladimirB/gometrics/internal/agent"
 	"github.com/VladimirB/gometrics/internal/config"
-	"github.com/VladimirB/gometrics/internal/shared/logger"
-	"github.com/VladimirB/gometrics/internal/module/agent/adapter/http"
 	model "github.com/VladimirB/gometrics/internal/model"
+	"github.com/VladimirB/gometrics/internal/module/agent/adapter/http"
+	"github.com/VladimirB/gometrics/internal/module/agent/service"
+	"github.com/VladimirB/gometrics/internal/shared/logger"
 	"go.uber.org/zap"
 )
 
@@ -22,10 +23,10 @@ func main() {
 
 	logger.Log.Info("Running Agent", zap.String("Start time", time.Now().Local().String()))
 
-	metrics := make(map[string]model.Metrics)
-	agent := agent.NewAgent(http.NewMetricApi())
-
 	cfg := config.GetAgentConfig()
+
+	metricApi := http.NewMetricApi(cfg.Address)
+	agentService := service.NewAgentService(metricApi)
 
 	pollTicker := time.NewTicker(cfg.PollInterval)
 	defer pollTicker.Stop()
@@ -33,13 +34,14 @@ func main() {
 	reportTicker := time.NewTicker(cfg.ReportInterval)
 	defer reportTicker.Stop()
 
+	metrics := make(map[string]model.Metrics)
 	for {
 		select {
 		case <-pollTicker.C:
-			agent.ReadMetrics(metrics)
+			agentService.ReadMetrics(metrics)
 		case <-reportTicker.C:
 			sendFunc := func() error {
-				return agent.SendMetrics(cfg.Address, metrics)
+				return agentService.SendMetrics(context.Background(), metrics)
 			}
 
 			doWithRetry(sendFunc, 5, 3*time.Second)

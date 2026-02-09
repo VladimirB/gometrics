@@ -1,29 +1,32 @@
 package http
 
 import (
+	"context"
 	"encoding/json"
 	"fmt"
 	"net/http"
 	"strings"
 	"time"
 
-	"github.com/VladimirB/gometrics/internal/shared/logger"
 	models "github.com/VladimirB/gometrics/internal/model"
+	"github.com/VladimirB/gometrics/internal/shared/logger"
 	"github.com/go-resty/resty/v2"
 	"go.uber.org/zap"
 )
 
 type MetricApi struct {
+	server string
 	client *resty.Client
 }
 
-func NewMetricApi() *MetricApi {
+func NewMetricApi(server string) *MetricApi {
 	return &MetricApi{
+		server: server,
 		client: resty.New().SetTimeout(3 * time.Second),
 	}
 }
 
-func (c MetricApi) Send(server string, metric models.Metrics) error {
+func (c MetricApi) Send(ctx context.Context, metric models.Metrics) error {
 	response, err := c.client.R().
 		SetHeader("Content-Type", "text/plain").
 		SetPathParams(map[string]string{
@@ -31,7 +34,8 @@ func (c MetricApi) Send(server string, metric models.Metrics) error {
 			"metricName":  metric.ID,
 			"metricValue": fmt.Sprintf("%f", *metric.Value),
 		}).
-		Post(fmt.Sprintf("http://%s/update/{metricType}/{metricName}/{metricValue}", server))
+		SetContext(ctx).
+		Post(fmt.Sprintf("http://%s/update/{metricType}/{metricName}/{metricValue}", c.server))
 
 	if err != nil {
 		return err
@@ -44,7 +48,7 @@ func (c MetricApi) Send(server string, metric models.Metrics) error {
 	return nil
 }
 
-func (c MetricApi) SendAsJSON(server string, metric models.Metrics) error {
+func (c MetricApi) SendAsJSON(ctx context.Context, metric models.Metrics) error {
 	body, err := json.Marshal(metric)
 	if err != nil {
 		return err
@@ -53,7 +57,8 @@ func (c MetricApi) SendAsJSON(server string, metric models.Metrics) error {
 	response, err := c.client.R().
 		SetHeader("Content-Type", "application/json").
 		SetBody(body).
-		Post(fmt.Sprintf("http://%s/update", server))
+		SetContext(ctx).
+		Post(fmt.Sprintf("http://%s/update", c.server))
 	if err != nil {
 		return err
 	}
