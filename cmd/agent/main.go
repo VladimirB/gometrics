@@ -6,7 +6,7 @@ import (
 
 	"github.com/VladimirB/gometrics/internal/agent"
 	"github.com/VladimirB/gometrics/internal/config"
-	"github.com/VladimirB/gometrics/internal/logger"
+	"github.com/VladimirB/gometrics/internal/shared/logger"
 	"github.com/VladimirB/gometrics/internal/metricapi"
 	model "github.com/VladimirB/gometrics/internal/model"
 	"go.uber.org/zap"

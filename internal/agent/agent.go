@@ -5,7 +5,7 @@ import (
 	"math/rand"
 	"runtime"
 
-	"github.com/VladimirB/gometrics/internal/logger"
+	"github.com/VladimirB/gometrics/internal/shared/logger"
 	model "github.com/VladimirB/gometrics/internal/model"
 	"go.uber.org/zap"
 )

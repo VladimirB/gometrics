@@ -4,7 +4,7 @@ import (
 	"net/http"
 	"time"
 
-	"github.com/VladimirB/gometrics/internal/logger"
+	"github.com/VladimirB/gometrics/internal/shared/logger"
 )
 
 type responseData struct {

@@ -6,7 +6,7 @@ import (
 	"net/http"
 	"strings"
 
-	"github.com/VladimirB/gometrics/internal/logger"
+	"github.com/VladimirB/gometrics/internal/shared/logger"
 	"go.uber.org/zap"
 )
 

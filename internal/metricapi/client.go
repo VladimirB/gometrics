@@ -7,7 +7,7 @@ import (
 	"strings"
 	"time"
 
-	"github.com/VladimirB/gometrics/internal/logger"
+	"github.com/VladimirB/gometrics/internal/shared/logger"
 	models "github.com/VladimirB/gometrics/internal/model"
 	"github.com/go-resty/resty/v2"
 	"go.uber.org/zap"

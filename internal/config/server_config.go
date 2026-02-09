@@ -4,7 +4,7 @@ import (
 	"flag"
 	"os"
 
-	"github.com/VladimirB/gometrics/internal/logger"
+	"github.com/VladimirB/gometrics/internal/shared/logger"
 	"github.com/caarlos0/env/v6"
 	"go.uber.org/zap"
 )
