@@ -1,7 +1,7 @@
 package handler
 
 import (
-	"github.com/VladimirB/gometrics/internal/handler/middleware"
+	"github.com/VladimirB/gometrics/internal/module/server/adapter/handler/middleware"
 	"github.com/go-chi/chi/v5"
 )
 
