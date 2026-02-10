@@ -9,7 +9,7 @@ import (
 	"testing"
 	"time"
 
-	"github.com/VladimirB/gometrics/internal/compress"
+	"github.com/VladimirB/gometrics/internal/shared/compress"
 	models "github.com/VladimirB/gometrics/internal/model"
 	"github.com/VladimirB/gometrics/internal/module/server/adapter/handler"
 	"github.com/VladimirB/gometrics/internal/module/server/port"
