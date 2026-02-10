@@ -1,6 +1,7 @@
 package handler_test
 
 import (
+	"context"
 	"fmt"
 	"net/http"
 	"net/http/httptest"
@@ -9,17 +10,18 @@ import (
 	"time"
 
 	"github.com/VladimirB/gometrics/internal/compress"
-	"github.com/VladimirB/gometrics/internal/module/server/adapter/handler"
 	models "github.com/VladimirB/gometrics/internal/model"
-	"github.com/VladimirB/gometrics/internal/repository"
+	"github.com/VladimirB/gometrics/internal/module/server/adapter/handler"
+	"github.com/VladimirB/gometrics/internal/module/server/port"
 	"github.com/VladimirB/gometrics/internal/module/server/service"
+	"github.com/VladimirB/gometrics/internal/repository"
 	"github.com/go-resty/resty/v2"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 )
 
 var httpClient *resty.Client
-var metricsService *service.MetricsService
+var metricsService port.MetricService
 var testServer *httptest.Server
 
 func setup() {
@@ -50,9 +52,9 @@ func TestMain(m *testing.M) {
 
 func TestValueMetricHandler_GetMetricHandler(t *testing.T) {
 	counterID := handler.GenTestID()
-	metricsService.SaveByFields(models.Counter, counterID, 100)
+	metricsService.SaveByFields(context.Background(), models.Counter, counterID, 100)
 	gaugeID := handler.GenTestID()
-	metricsService.SaveByFields(models.Gauge, gaugeID, 3.14)
+	metricsService.SaveByFields(context.Background(), models.Gauge, gaugeID, 3.14)
 
 	testTable := []struct {
 		name       string
@@ -79,9 +81,9 @@ func TestValueMetricHandler_GetMetricHandler(t *testing.T) {
 
 func TestValueMetricHandler_PostValueMetricHandler(t *testing.T) {
 	counterID := handler.GenTestID()
-	metricsService.SaveByFields(models.Counter, counterID, 1000)
+	metricsService.SaveByFields(context.Background(), models.Counter, counterID, 1000)
 	gaugeID := handler.GenTestID()
-	metricsService.SaveByFields(models.Gauge, gaugeID, 3.1415)
+	metricsService.SaveByFields(context.Background(), models.Gauge, gaugeID, 3.1415)
 
 	tests := []struct {
 		name       string
@@ -112,7 +114,7 @@ func TestValueMetricHandler_PostValueMetricHandler(t *testing.T) {
 
 func TestValueMetricHandler_PostValueMetricHandlerGzip(t *testing.T) {
 	counterID := handler.GenTestID()
-	metricsService.SaveByFields(models.Counter, counterID, 1000)
+	metricsService.SaveByFields(context.Background(), models.Counter, counterID, 1000)
 
 	requestBody := fmt.Sprintf(`{"id":"%s", "type":"counter"}`, counterID)
 	expectedResponse := fmt.Sprintf(`{"id":"%s", "type":"counter", "delta":%d}`, counterID, 1000)

@@ -7,19 +7,19 @@ import (
 	"net/http"
 
 	models "github.com/VladimirB/gometrics/internal/model"
-	"github.com/VladimirB/gometrics/internal/module/server/service"
+	"github.com/VladimirB/gometrics/internal/module/server/port"
 	"github.com/VladimirB/gometrics/internal/shared/logger"
 	"github.com/go-chi/chi/v5"
 	"go.uber.org/zap"
 )
 
 type ValueMetricHandler struct {
-	metricsService *service.MetricsService
+	metricService port.MetricService
 }
 
-func NewValueMetricHandler(service *service.MetricsService) *ValueMetricHandler {
+func NewValueMetricHandler(service port.MetricService) *ValueMetricHandler {
 	return &ValueMetricHandler{
-		metricsService: service,
+		metricService: service,
 	}
 }
 
@@ -32,7 +32,7 @@ func (h ValueMetricHandler) GetMetricHandler() http.HandlerFunc {
 		}
 
 		metricName := chi.URLParam(r, "metricName")
-		metric, err := h.metricsService.Get(metricName)
+		metric, err := h.metricService.Get(r.Context(), metricName)
 		if err != nil {
 			http.Error(w, err.Error(), http.StatusNotFound)
 			return
@@ -75,7 +75,7 @@ func (h ValueMetricHandler) PostValueMetricHandler() http.HandlerFunc {
 			return
 		}
 
-		metric, err := h.metricsService.Get(askedMetric.ID)
+		metric, err := h.metricService.Get(r.Context(), askedMetric.ID)
 		if err != nil {
 			metric = models.Metrics{
 				ID:    askedMetric.ID,

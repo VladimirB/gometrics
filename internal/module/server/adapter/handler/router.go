@@ -13,20 +13,20 @@ func NewRouter(mainPageHandler *MainPageHandler,
 	router := chi.NewRouter()
 
 	router.Route("/", func(r chi.Router) {
-		r.Get("/", RequestLogger(middleware.GZip(mainPageHandler.GetMainPage())))
+		r.Get("/", middleware.RequestLogger(middleware.GZip(mainPageHandler.GetMainPage())))
 
 		r.Route("/update", func(r chi.Router) {
-			r.Post("/", RequestLogger(middleware.GZip(updateHandler.UpdateMetricJSONHandler())))
-			r.Post("/{metricType}/{metricValue}", RequestLogger(updateHandler.UpdateNoNameMetricHandler()))
-			r.Post("/{metricType}/{metricName}/{metricValue}", RequestLogger(updateHandler.UpdateMetricByNameHandler()))
+			r.Post("/", middleware.RequestLogger(middleware.GZip(updateHandler.UpdateMetricJSONHandler())))
+			r.Post("/{metricType}/{metricValue}", middleware.RequestLogger(updateHandler.UpdateNoNameMetricHandler()))
+			r.Post("/{metricType}/{metricName}/{metricValue}", middleware.RequestLogger(updateHandler.UpdateMetricByNameHandler()))
 		})
 
 		r.Route("/value", func(r chi.Router) {
-			r.Post("/", RequestLogger(middleware.GZip(valueHandler.PostValueMetricHandler())))
-			r.Get("/{metricType}/{metricName}", RequestLogger(valueHandler.GetMetricHandler()))
+			r.Post("/", middleware.RequestLogger(middleware.GZip(valueHandler.PostValueMetricHandler())))
+			r.Get("/{metricType}/{metricName}", middleware.RequestLogger(valueHandler.GetMetricHandler()))
 		})
 
-		r.Get("/ping", RequestLogger(dbPingHandler.Ping))
+		r.Get("/ping", middleware.RequestLogger(dbPingHandler.Ping))
 	})
 
 	return router

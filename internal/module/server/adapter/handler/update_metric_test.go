@@ -6,8 +6,8 @@ import (
 	"net/http"
 	"testing"
 
-	"github.com/VladimirB/gometrics/internal/module/server/adapter/handler"
 	models "github.com/VladimirB/gometrics/internal/model"
+	"github.com/VladimirB/gometrics/internal/module/server/adapter/handler"
 
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"

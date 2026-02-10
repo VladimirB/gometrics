@@ -7,19 +7,19 @@ import (
 	"strconv"
 
 	model "github.com/VladimirB/gometrics/internal/model"
-	"github.com/VladimirB/gometrics/internal/module/server/service"
+	"github.com/VladimirB/gometrics/internal/module/server/port"
 	"github.com/VladimirB/gometrics/internal/shared/logger"
 	"github.com/go-chi/chi/v5"
 	"go.uber.org/zap"
 )
 
 type UpdateMetricHandler struct {
-	metricsService *service.MetricsService
+	metricService port.MetricService
 }
 
-func NewUpdateMetricHandler(service *service.MetricsService) *UpdateMetricHandler {
+func NewUpdateMetricHandler(service port.MetricService) *UpdateMetricHandler {
 	return &UpdateMetricHandler{
-		metricsService: service,
+		metricService: service,
 	}
 }
 
@@ -39,7 +39,7 @@ func (h UpdateMetricHandler) UpdateMetricJSONHandler() http.HandlerFunc {
 			return
 		}
 
-		if err := h.metricsService.Save(metric); err != nil {
+		if err := h.metricService.Save(r.Context(), metric); err != nil {
 			http.Error(w, "incorrect metric ID", http.StatusBadRequest)
 			return
 		}
@@ -70,7 +70,7 @@ func (h UpdateMetricHandler) UpdateMetricByNameHandler() http.HandlerFunc {
 			metricValue = parsed
 		}
 
-		if err := h.metricsService.SaveByFields(metricType, metricName, metricValue); err != nil {
+		if err := h.metricService.SaveByFields(r.Context(), metricType, metricName, metricValue); err != nil {
 			http.Error(w, "incorrect metric ID", http.StatusBadRequest)
 			return
 		}
