@@ -18,7 +18,7 @@ func NewDatabasePingHandler(db *sql.DB) *DatabasePingHandler {
 }
 
 func (h *DatabasePingHandler) Ping(w http.ResponseWriter, r *http.Request) {
-	ctx, cancel := context.WithTimeout(context.Background(), 1*time.Second)
+	ctx, cancel := context.WithTimeout(r.Context(), 1*time.Second)
 	defer cancel()
 
 	if err := h.db.PingContext(ctx); err != nil {
