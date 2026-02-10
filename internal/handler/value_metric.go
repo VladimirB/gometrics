@@ -6,9 +6,9 @@ import (
 	"io"
 	"net/http"
 
-	"github.com/VladimirB/gometrics/internal/shared/logger"
 	models "github.com/VladimirB/gometrics/internal/model"
 	"github.com/VladimirB/gometrics/internal/service"
+	"github.com/VladimirB/gometrics/internal/shared/logger"
 	"github.com/go-chi/chi/v5"
 	"go.uber.org/zap"
 )

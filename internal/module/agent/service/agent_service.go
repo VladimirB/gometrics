@@ -5,6 +5,7 @@ import (
 	"errors"
 	"math/rand"
 	"runtime"
+	"time"
 
 	model "github.com/VladimirB/gometrics/internal/model"
 	"github.com/VladimirB/gometrics/internal/module/agent/port"
@@ -13,12 +14,14 @@ import (
 )
 
 type AgentService struct {
-	metricProvider port.MetricProvider
+	metricProvider      port.MetricProvider
+	reportMetricTimeout time.Duration
 }
 
-func NewAgentService(metricProvider port.MetricProvider) *AgentService {
+func NewAgentService(metricProvider port.MetricProvider, reportMetricTimeout time.Duration) *AgentService {
 	return &AgentService{
-		metricProvider: metricProvider,
+		metricProvider:      metricProvider,
+		reportMetricTimeout: reportMetricTimeout,
 	}
 }
 
@@ -89,8 +92,11 @@ func fill(metrics map[string]model.Metrics, metricType string, metricName string
 }
 
 func (a AgentService) SendMetrics(ctx context.Context, metrics map[string]model.Metrics) error {
+	ctx, cancel := context.WithTimeout(ctx, a.reportMetricTimeout)
+	defer cancel()
+
 	for _, metric := range metrics {
-		if err := a.metricProvider.SendAsJSON(ctx, metric); err != nil {
+		if err := a.metricProvider.Send(ctx, metric); err != nil {
 			logger.Log.Error("error on metric send", zap.Error(err), zap.String("Metric", metric.String()))
 			fill(metrics, model.Counter, model.PollCount, 0)
 			return errors.New("error on metric send")

@@ -17,10 +17,10 @@ import (
 
 func CreateTestServer(service *service.MetricsService) *httptest.Server {
 	db, _, err := sqlmock.New()
-    if err != nil {
-        log.Fatalf("Error on sqlmock creation: %s", err)
-    }
-    defer db.Close()
+	if err != nil {
+		log.Fatalf("Error on sqlmock creation: %s", err)
+	}
+	defer db.Close()
 
 	metricsService := service
 	mainPageHandler := NewMainPageHandler(metricsService, nil)

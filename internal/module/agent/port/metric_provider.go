@@ -8,5 +8,4 @@ import (
 
 type MetricProvider interface {
 	Send(ctx context.Context, metric models.Metrics) error
-	SendAsJSON(ctx context.Context, metric models.Metrics) error
 }
