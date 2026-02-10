@@ -12,7 +12,7 @@ import (
 	"github.com/VladimirB/gometrics/internal/handler"
 	models "github.com/VladimirB/gometrics/internal/model"
 	"github.com/VladimirB/gometrics/internal/repository"
-	"github.com/VladimirB/gometrics/internal/service"
+	"github.com/VladimirB/gometrics/internal/module/server/service"
 	"github.com/VladimirB/gometrics/internal/shared/logger"
 	_ "github.com/jackc/pgx/v5/stdlib"
 	"go.uber.org/zap"

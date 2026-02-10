@@ -12,7 +12,7 @@ import (
 	"github.com/VladimirB/gometrics/internal/handler"
 	models "github.com/VladimirB/gometrics/internal/model"
 	"github.com/VladimirB/gometrics/internal/repository"
-	"github.com/VladimirB/gometrics/internal/service"
+	"github.com/VladimirB/gometrics/internal/module/server/service"
 	"github.com/go-resty/resty/v2"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"

@@ -6,7 +6,7 @@ import (
 	"net/http"
 
 	models "github.com/VladimirB/gometrics/internal/model"
-	"github.com/VladimirB/gometrics/internal/service"
+	"github.com/VladimirB/gometrics/internal/module/server/service"
 )
 
 type MainPageHandler struct {

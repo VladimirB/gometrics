@@ -11,7 +11,7 @@ import (
 	"testing"
 
 	"github.com/DATA-DOG/go-sqlmock"
-	"github.com/VladimirB/gometrics/internal/service"
+	"github.com/VladimirB/gometrics/internal/module/server/service"
 	"github.com/stretchr/testify/require"
 )
 
