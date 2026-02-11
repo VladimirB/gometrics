@@ -13,7 +13,7 @@ import (
 	"time"
 
 	"github.com/VladimirB/gometrics/internal/config"
-	models "github.com/VladimirB/gometrics/internal/model"
+	"github.com/VladimirB/gometrics/internal/domain"
 	"github.com/VladimirB/gometrics/internal/module/server/adapter/handler"
 	"github.com/VladimirB/gometrics/internal/module/server/port"
 	"github.com/VladimirB/gometrics/internal/module/server/service"
@@ -107,7 +107,7 @@ func runStoreInFileTicker(ctx context.Context, config config.ServerConfig, metri
 			continue
 		}
 
-		var metrics []models.Metrics
+		var metrics []domain.Metric
 		for _, value := range currentMetrics {
 			metrics = append(metrics, value)
 		}

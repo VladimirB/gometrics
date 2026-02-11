@@ -1,4 +1,4 @@
-package models
+package domain
 
 import "fmt"
 
@@ -78,7 +78,7 @@ var AllowedMetrics = map[string]bool{
 // Delta и Value объявлены через указатели,
 // что бы отличать значение "0", от не заданного значения
 // и соответственно не кодировать в структуру.
-type Metrics struct {
+type Metric struct {
 	ID    string   `json:"id"`
 	MType string   `json:"type"`
 	Delta *int64   `json:"delta,omitempty"` // значение метрики в случае передачи counter
@@ -86,7 +86,7 @@ type Metrics struct {
 	Hash  string   `json:"hash,omitempty"`
 }
 
-func (m Metrics) Validate() error {
+func (m Metric) Validate() error {
 	if m.MType != Gauge && m.MType != Counter {
 		return fmt.Errorf("not allowed metric type")
 	}
@@ -94,6 +94,6 @@ func (m Metrics) Validate() error {
 	return nil
 }
 
-func (m Metrics) String() string {
+func (m Metric) String() string {
 	return fmt.Sprintf("Metric(ID: %s, Type: %s, Value: %p, Delta: %p)", m.ID, m.MType, m.Value, m.Delta)
 }

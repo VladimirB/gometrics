@@ -4,7 +4,7 @@ import (
 	"encoding/json"
 	"os"
 
-	models "github.com/VladimirB/gometrics/internal/model"
+	"github.com/VladimirB/gometrics/internal/domain"
 )
 
 type MetricsFileWriter struct {
@@ -24,7 +24,7 @@ func NewMetricsFileWriter(fileName string) (*MetricsFileWriter, error) {
 	}, nil
 }
 
-func (fw *MetricsFileWriter) Write(metrics []models.Metrics) error {
+func (fw *MetricsFileWriter) Write(metrics []domain.Metric) error {
 	return fw.encoder.Encode(metrics)
 }
 

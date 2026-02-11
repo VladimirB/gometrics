@@ -8,7 +8,7 @@ import (
 	"strings"
 	"time"
 
-	models "github.com/VladimirB/gometrics/internal/model"
+	"github.com/VladimirB/gometrics/internal/domain"
 	"github.com/VladimirB/gometrics/internal/shared/logger"
 	"github.com/go-resty/resty/v2"
 	"go.uber.org/zap"
@@ -26,7 +26,7 @@ func NewMetricApi(server string) *MetricApi {
 	}
 }
 
-func (c MetricApi) Send(ctx context.Context, metric models.Metrics) error {
+func (c MetricApi) Send(ctx context.Context, metric domain.Metric) error {
 	request := mapToMetricRequest(metric)
 	body, err := json.Marshal(request)
 	if err != nil {

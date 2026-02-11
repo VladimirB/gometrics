@@ -5,7 +5,7 @@ import (
 	"html/template"
 	"net/http"
 
-	models "github.com/VladimirB/gometrics/internal/model"
+	"github.com/VladimirB/gometrics/internal/domain"
 	"github.com/VladimirB/gometrics/internal/module/server/port"
 )
 
@@ -47,7 +47,7 @@ func (h MainPageHandler) GetMainPage() http.HandlerFunc {
 	}
 }
 
-func preparePageData(metrics map[string]models.Metrics) MainPageData {
+func preparePageData(metrics map[string]domain.Metric) MainPageData {
 	var raws []Raw
 	for _, m := range metrics {
 		raw := Raw{
@@ -55,7 +55,7 @@ func preparePageData(metrics map[string]models.Metrics) MainPageData {
 			Type: m.MType,
 		}
 
-		if m.MType == models.Counter {
+		if m.MType == domain.Counter {
 			raw.Value = fmt.Sprint(*m.Delta)
 		} else {
 			raw.Value = fmt.Sprint(*m.Value)

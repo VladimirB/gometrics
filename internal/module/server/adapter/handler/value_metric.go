@@ -6,7 +6,7 @@ import (
 	"io"
 	"net/http"
 
-	models "github.com/VladimirB/gometrics/internal/model"
+	"github.com/VladimirB/gometrics/internal/domain"
 	"github.com/VladimirB/gometrics/internal/module/server/port"
 	"github.com/VladimirB/gometrics/internal/shared/logger"
 	"github.com/go-chi/chi/v5"
@@ -26,7 +26,7 @@ func NewValueMetricHandler(service port.MetricService) *ValueMetricHandler {
 func (h ValueMetricHandler) GetMetricHandler() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		metricType := chi.URLParam(r, "metricType")
-		if metricType != models.Counter && metricType != models.Gauge {
+		if metricType != domain.Counter && metricType != domain.Gauge {
 			http.Error(w, "unsupported metric type", http.StatusBadRequest)
 			return
 		}
@@ -39,9 +39,9 @@ func (h ValueMetricHandler) GetMetricHandler() http.HandlerFunc {
 		}
 
 		switch metric.MType {
-		case models.Counter:
+		case domain.Counter:
 			w.Write([]byte(fmt.Sprint(*metric.Delta)))
-		case models.Gauge:
+		case domain.Gauge:
 			w.Write([]byte(fmt.Sprint(*metric.Value)))
 		}
 
@@ -60,7 +60,7 @@ func (h ValueMetricHandler) PostValueMetricHandler() http.HandlerFunc {
 			return
 		}
 
-		var askedMetric models.Metrics
+		var askedMetric domain.Metric
 		if err := json.Unmarshal(buffer, &askedMetric); err != nil {
 			logger.Log.Error("cant unmarshal metric to JSON", zap.Error(err))
 			fmt.Println("Cant unmarshal metric to JSON", err)
@@ -77,12 +77,12 @@ func (h ValueMetricHandler) PostValueMetricHandler() http.HandlerFunc {
 
 		metric, err := h.metricService.Get(r.Context(), askedMetric.ID)
 		if err != nil {
-			metric = models.Metrics{
+			metric = domain.Metric{
 				ID:    askedMetric.ID,
 				MType: askedMetric.MType,
 			}
 
-			if askedMetric.MType == models.Counter {
+			if askedMetric.MType == domain.Counter {
 				metric.Delta = new(int64)
 			} else {
 				metric.Value = new(float64)

@@ -1,6 +1,6 @@
 package http_api
 
-import models "github.com/VladimirB/gometrics/internal/model"
+import "github.com/VladimirB/gometrics/internal/domain"
 
 type metricRequest struct {
 	ID    string   `json:"id"`
@@ -10,7 +10,7 @@ type metricRequest struct {
 	Hash  string   `json:"hash,omitempty"`
 }
 
-func mapToMetricRequest(m models.Metrics) metricRequest {
+func mapToMetricRequest(m domain.Metric) metricRequest {
 	return metricRequest{
 		ID: m.ID,
 		MType: m.MType,

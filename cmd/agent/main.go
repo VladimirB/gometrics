@@ -6,7 +6,7 @@ import (
 	"time"
 
 	"github.com/VladimirB/gometrics/internal/config"
-	model "github.com/VladimirB/gometrics/internal/model"
+	"github.com/VladimirB/gometrics/internal/domain"
 	"github.com/VladimirB/gometrics/internal/module/agent/adapter/http_api"
 	"github.com/VladimirB/gometrics/internal/module/agent/service"
 	"github.com/VladimirB/gometrics/internal/shared/logger"
@@ -34,7 +34,7 @@ func main() {
 	reportTicker := time.NewTicker(cfg.ReportInterval)
 	defer reportTicker.Stop()
 
-	metrics := make(map[string]model.Metrics)
+	metrics := make(map[string]domain.Metric)
 	for {
 		select {
 		case <-pollTicker.C:

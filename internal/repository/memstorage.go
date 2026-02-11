@@ -3,31 +3,31 @@ package repository
 import (
 	"fmt"
 
-	models "github.com/VladimirB/gometrics/internal/model"
+	"github.com/VladimirB/gometrics/internal/domain"
 )
 
 type MemStorage struct {
-	storage map[string]models.Metrics
+	storage map[string]domain.Metric
 }
 
 func NewMemStorage() *MemStorage {
 	return &MemStorage{
-		storage: make(map[string]models.Metrics),
+		storage: make(map[string]domain.Metric),
 	}
 }
 
-func (ms *MemStorage) Save(metricName string, metric models.Metrics) {
+func (ms *MemStorage) Save(metricName string, metric domain.Metric) {
 	ms.storage[metricName] = metric
 }
 
-func (ms *MemStorage) Get(metricName string) (models.Metrics, error) {
+func (ms *MemStorage) Get(metricName string) (domain.Metric, error) {
 	if metric, ok := ms.storage[metricName]; !ok {
-		return models.Metrics{}, fmt.Errorf("metric %q not found", metricName)
+		return domain.Metric{}, fmt.Errorf("metric %q not found", metricName)
 	} else {
 		return metric, nil
 	}
 }
 
-func (ms *MemStorage) GetAll() map[string]models.Metrics {
+func (ms *MemStorage) GetAll() map[string]domain.Metric {
 	return ms.storage
 }

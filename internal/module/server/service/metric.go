@@ -3,7 +3,7 @@ package service
 import (
 	"context"
 
-	model "github.com/VladimirB/gometrics/internal/model"
+	"github.com/VladimirB/gometrics/internal/domain"
 	"github.com/VladimirB/gometrics/internal/module/server/port"
 	"github.com/VladimirB/gometrics/internal/repository"
 )
@@ -18,13 +18,13 @@ func NewMetricsService(storage *repository.MemStorage) port.MetricService {
 	}
 }
 
-func (s *metricService) Save(ctx context.Context, metric model.Metrics) error {
+func (s *metricService) Save(ctx context.Context, metric domain.Metric) error {
 	if err := metric.Validate(); err != nil {
 		return err
 	}
 
 	// Значения для счетчика необходимо сохранять в Delta
-	if metric.MType == model.Counter && metric.Delta != nil {
+	if metric.MType == domain.Counter && metric.Delta != nil {
 		if saved, err := s.storage.Get(metric.ID); err == nil {
 			*metric.Delta += *saved.Delta
 		}
@@ -36,16 +36,16 @@ func (s *metricService) Save(ctx context.Context, metric model.Metrics) error {
 }
 
 func (s *metricService) SaveByFields(ctx context.Context, metricType string, metricID string, value float64) error {
-	metric := model.Metrics{
+	metric := domain.Metric{
 		ID:    metricID,
 		MType: metricType,
 	}
 
 	switch metricType {
-	case model.Counter:
+	case domain.Counter:
 		metric.Delta = new(int64)
 		*metric.Delta = int64(value)
-	case model.Gauge:
+	case domain.Gauge:
 		metric.Value = new(float64)
 		*metric.Value = value
 	}
@@ -53,10 +53,10 @@ func (s *metricService) SaveByFields(ctx context.Context, metricType string, met
 	return s.Save(ctx, metric)
 }
 
-func (s *metricService) Get(ctx context.Context, metricID string) (model.Metrics, error) {
+func (s *metricService) Get(ctx context.Context, metricID string) (domain.Metric, error) {
 	return s.storage.Get(metricID)
 }
 
-func (s *metricService) GetAll(ctx context.Context) map[string]model.Metrics {
+func (s *metricService) GetAll(ctx context.Context) map[string]domain.Metric {
 	return s.storage.GetAll()
 }

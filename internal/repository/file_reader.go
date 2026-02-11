@@ -4,7 +4,7 @@ import (
 	"encoding/json"
 	"os"
 
-	models "github.com/VladimirB/gometrics/internal/model"
+	"github.com/VladimirB/gometrics/internal/domain"
 )
 
 type MetricsFileReader struct {
@@ -24,8 +24,8 @@ func NewMetricsFileReader(fileName string) (*MetricsFileReader, error) {
 	}, nil
 }
 
-func (fr *MetricsFileReader) Read() ([]models.Metrics, error) {
-	var result = make([]models.Metrics, 0)
+func (fr *MetricsFileReader) Read() ([]domain.Metric, error) {
+	var result = make([]domain.Metric, 0)
 
 	if err := fr.decoder.Decode(&result); err != nil {
 		return nil, err

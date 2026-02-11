@@ -7,7 +7,7 @@ import (
 	"runtime"
 	"time"
 
-	model "github.com/VladimirB/gometrics/internal/model"
+	"github.com/VladimirB/gometrics/internal/domain"
 	"github.com/VladimirB/gometrics/internal/module/agent/port"
 	"github.com/VladimirB/gometrics/internal/shared/logger"
 	"go.uber.org/zap"
@@ -25,57 +25,57 @@ func NewAgentService(metricProvider port.MetricProvider, reportMetricTimeout tim
 	}
 }
 
-func (AgentService) ReadMetrics(metrics map[string]model.Metrics) {
+func (AgentService) ReadMetrics(metrics map[string]domain.Metric) {
 	var stats runtime.MemStats
 	runtime.ReadMemStats(&stats)
 
-	fill(metrics, model.Gauge, model.Alloc, float64(stats.Alloc))
-	fill(metrics, model.Gauge, model.BuckHashSys, float64(stats.BuckHashSys))
-	fill(metrics, model.Gauge, model.Frees, float64(stats.Frees))
-	fill(metrics, model.Gauge, model.GCCPUFraction, stats.GCCPUFraction)
-	fill(metrics, model.Gauge, model.GCSys, float64(stats.GCSys))
-	fill(metrics, model.Gauge, model.HeapAlloc, float64(stats.HeapAlloc))
-	fill(metrics, model.Gauge, model.HeapIdle, float64(stats.HeapIdle))
-	fill(metrics, model.Gauge, model.HeapInuse, float64(stats.HeapInuse))
-	fill(metrics, model.Gauge, model.HeapObjects, float64(stats.HeapObjects))
-	fill(metrics, model.Gauge, model.HeapReleased, float64(stats.HeapReleased))
-	fill(metrics, model.Gauge, model.HeapSys, float64(stats.HeapSys))
-	fill(metrics, model.Gauge, model.LastGC, float64(stats.LastGC))
-	fill(metrics, model.Gauge, model.Lookups, float64(stats.Lookups))
-	fill(metrics, model.Gauge, model.MCacheInuse, float64(stats.MCacheInuse))
-	fill(metrics, model.Gauge, model.MCacheSys, float64(stats.MCacheSys))
-	fill(metrics, model.Gauge, model.MSpanInuse, float64(stats.MSpanInuse))
-	fill(metrics, model.Gauge, model.MSpanSys, float64(stats.MSpanSys))
-	fill(metrics, model.Gauge, model.Mallocs, float64(stats.Mallocs))
-	fill(metrics, model.Gauge, model.NextGC, float64(stats.NextGC))
-	fill(metrics, model.Gauge, model.NumForcedGC, float64(stats.NumForcedGC))
-	fill(metrics, model.Gauge, model.NumGC, float64(stats.NumGC))
-	fill(metrics, model.Gauge, model.OtherSys, float64(stats.OtherSys))
-	fill(metrics, model.Gauge, model.PauseTotalNs, float64(stats.PauseTotalNs))
-	fill(metrics, model.Gauge, model.StackInuse, float64(stats.StackInuse))
-	fill(metrics, model.Gauge, model.StackSys, float64(stats.StackSys))
-	fill(metrics, model.Gauge, model.Sys, float64(stats.Sys))
-	fill(metrics, model.Gauge, model.TotalAlloc, float64(stats.TotalAlloc))
-	fill(metrics, model.Gauge, model.RandomValue, rand.Float64())
+	fill(metrics, domain.Gauge, domain.Alloc, float64(stats.Alloc))
+	fill(metrics, domain.Gauge, domain.BuckHashSys, float64(stats.BuckHashSys))
+	fill(metrics, domain.Gauge, domain.Frees, float64(stats.Frees))
+	fill(metrics, domain.Gauge, domain.GCCPUFraction, stats.GCCPUFraction)
+	fill(metrics, domain.Gauge, domain.GCSys, float64(stats.GCSys))
+	fill(metrics, domain.Gauge, domain.HeapAlloc, float64(stats.HeapAlloc))
+	fill(metrics, domain.Gauge, domain.HeapIdle, float64(stats.HeapIdle))
+	fill(metrics, domain.Gauge, domain.HeapInuse, float64(stats.HeapInuse))
+	fill(metrics, domain.Gauge, domain.HeapObjects, float64(stats.HeapObjects))
+	fill(metrics, domain.Gauge, domain.HeapReleased, float64(stats.HeapReleased))
+	fill(metrics, domain.Gauge, domain.HeapSys, float64(stats.HeapSys))
+	fill(metrics, domain.Gauge, domain.LastGC, float64(stats.LastGC))
+	fill(metrics, domain.Gauge, domain.Lookups, float64(stats.Lookups))
+	fill(metrics, domain.Gauge, domain.MCacheInuse, float64(stats.MCacheInuse))
+	fill(metrics, domain.Gauge, domain.MCacheSys, float64(stats.MCacheSys))
+	fill(metrics, domain.Gauge, domain.MSpanInuse, float64(stats.MSpanInuse))
+	fill(metrics, domain.Gauge, domain.MSpanSys, float64(stats.MSpanSys))
+	fill(metrics, domain.Gauge, domain.Mallocs, float64(stats.Mallocs))
+	fill(metrics, domain.Gauge, domain.NextGC, float64(stats.NextGC))
+	fill(metrics, domain.Gauge, domain.NumForcedGC, float64(stats.NumForcedGC))
+	fill(metrics, domain.Gauge, domain.NumGC, float64(stats.NumGC))
+	fill(metrics, domain.Gauge, domain.OtherSys, float64(stats.OtherSys))
+	fill(metrics, domain.Gauge, domain.PauseTotalNs, float64(stats.PauseTotalNs))
+	fill(metrics, domain.Gauge, domain.StackInuse, float64(stats.StackInuse))
+	fill(metrics, domain.Gauge, domain.StackSys, float64(stats.StackSys))
+	fill(metrics, domain.Gauge, domain.Sys, float64(stats.Sys))
+	fill(metrics, domain.Gauge, domain.TotalAlloc, float64(stats.TotalAlloc))
+	fill(metrics, domain.Gauge, domain.RandomValue, rand.Float64())
 
 	var counter = 0
-	pollCount, ok := metrics[model.PollCount]
+	pollCount, ok := metrics[domain.PollCount]
 	if ok {
 		counter = int(*pollCount.Delta)
 	}
 	counter++
-	fill(metrics, model.Counter, model.PollCount, float64(counter))
+	fill(metrics, domain.Counter, domain.PollCount, float64(counter))
 }
 
-func fill(metrics map[string]model.Metrics, metricType string, metricName string, value float64) {
+func fill(metrics map[string]domain.Metric, metricType string, metricName string, value float64) {
 	metric, ok := metrics[metricName]
 	if !ok {
-		metric = model.Metrics{
+		metric = domain.Metric{
 			ID:    metricName,
 			MType: metricType,
 		}
 
-		if metricType == model.Counter {
+		if metricType == domain.Counter {
 			metric.Delta = new(int64)
 		} else {
 			metric.Value = new(float64)
@@ -84,21 +84,21 @@ func fill(metrics map[string]model.Metrics, metricType string, metricName string
 		metrics[metricName] = metric
 	}
 
-	if metricType == model.Counter {
+	if metricType == domain.Counter {
 		*metric.Delta = int64(value)
 	} else {
 		*metric.Value = value
 	}
 }
 
-func (a AgentService) SendMetrics(ctx context.Context, metrics map[string]model.Metrics) error {
+func (a AgentService) SendMetrics(ctx context.Context, metrics map[string]domain.Metric) error {
 	ctx, cancel := context.WithTimeout(ctx, a.reportMetricTimeout)
 	defer cancel()
 
 	for _, metric := range metrics {
 		if err := a.metricProvider.Send(ctx, metric); err != nil {
 			logger.Log.Error("error on metric send", zap.Error(err), zap.String("Metric", metric.String()))
-			fill(metrics, model.Counter, model.PollCount, 0)
+			fill(metrics, domain.Counter, domain.PollCount, 0)
 			return errors.New("error on metric send")
 		}
 	}

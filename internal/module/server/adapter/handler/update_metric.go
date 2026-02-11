@@ -6,7 +6,7 @@ import (
 	"net/http"
 	"strconv"
 
-	model "github.com/VladimirB/gometrics/internal/model"
+	"github.com/VladimirB/gometrics/internal/domain"
 	"github.com/VladimirB/gometrics/internal/module/server/port"
 	"github.com/VladimirB/gometrics/internal/shared/logger"
 	"github.com/go-chi/chi/v5"
@@ -32,7 +32,7 @@ func (h UpdateMetricHandler) UpdateMetricJSONHandler() http.HandlerFunc {
 			return
 		}
 
-		var metric model.Metrics
+		var metric domain.Metric
 		if err = json.Unmarshal(buffer.Bytes(), &metric); err != nil {
 			logger.Log.Info("error unmarshaling metric", zap.String("Metric", metric.String()))
 			http.Error(w, err.Error(), http.StatusBadRequest)
