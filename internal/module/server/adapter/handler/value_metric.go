@@ -3,7 +3,6 @@ package handler
 import (
 	"encoding/json"
 	"fmt"
-	"io"
 	"net/http"
 
 	"github.com/VladimirB/gometrics/internal/domain"
@@ -51,51 +50,33 @@ func (h ValueMetricHandler) GetMetricHandler() http.HandlerFunc {
 
 func (h ValueMetricHandler) PostValueMetricHandler() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-		var buffer []byte
-		buffer, err := io.ReadAll(r.Body)
-		if err != nil {
-			logger.Log.Info("cant read request body", zap.Error(err))
-			fmt.Println("Cant read request body", err)
+		var req metricRequest
+		if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
+			logger.Log.Error("cant decode request from JSON", zap.Error(err))
 			http.Error(w, err.Error(), http.StatusBadRequest)
 			return
 		}
 
-		var askedMetric domain.Metric
-		if err := json.Unmarshal(buffer, &askedMetric); err != nil {
-			logger.Log.Error("cant unmarshal metric to JSON", zap.Error(err))
-			fmt.Println("Cant unmarshal metric to JSON", err)
-			http.Error(w, err.Error(), http.StatusBadRequest)
-			return
-		}
-
-		if err := askedMetric.Validate(); err != nil {
-			logger.Log.Info("asked metric invalid", zap.Error(err), zap.String("metric", askedMetric.String()))
-			fmt.Println("Validation Error", err)
-			http.Error(w, err.Error(), http.StatusBadRequest)
-			return
-		}
-
-		metric, err := h.metricService.Get(r.Context(), askedMetric.ID)
-		if err != nil {
+		metric, err := h.metricService.Get(r.Context(), req.ID)
+		if err != nil { // в случае ошибки по требования нужно возвращать пустое значение метрики
 			metric = domain.Metric{
-				ID:    askedMetric.ID,
-				MType: askedMetric.MType,
+				ID:    req.ID,
+				MType: req.MType,
 			}
 
-			if askedMetric.MType == domain.Counter {
+			if req.MType == domain.Counter {
 				metric.Delta = new(int64)
 			} else {
 				metric.Value = new(float64)
 			}
 		}
 
-		if resp, err := json.Marshal(metric); err != nil {
+		response := mapToMetricResponse(metric)
+		w.Header().Set("Content-Type", "application/json")
+		if err := json.NewEncoder(w).Encode(response); err != nil {
 			http.Error(w, err.Error(), http.StatusInternalServerError)
 			return
-		} else {
-			w.Header().Set("Content-Type", "application/json")
-			w.Write(resp)
-			w.WriteHeader(http.StatusOK)
 		}
+		w.WriteHeader(http.StatusOK)
 	}
 }

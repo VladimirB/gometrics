@@ -12,7 +12,7 @@ type metricRequest struct {
 
 func mapToMetricRequest(m domain.Metric) metricRequest {
 	return metricRequest{
-		ID: m.ID,
+		ID:    m.ID,
 		MType: m.MType,
 		Delta: m.Delta,
 		Value: m.Value,

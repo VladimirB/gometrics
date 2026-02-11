@@ -1,12 +1,10 @@
 package handler
 
 import (
-	"bytes"
 	"encoding/json"
 	"net/http"
 	"strconv"
 
-	"github.com/VladimirB/gometrics/internal/domain"
 	"github.com/VladimirB/gometrics/internal/module/server/port"
 	"github.com/VladimirB/gometrics/internal/shared/logger"
 	"github.com/go-chi/chi/v5"
@@ -25,34 +23,27 @@ func NewUpdateMetricHandler(service port.MetricService) *UpdateMetricHandler {
 
 func (h UpdateMetricHandler) UpdateMetricJSONHandler() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-		var buffer bytes.Buffer
-		_, err := buffer.ReadFrom(r.Body)
-		if err != nil {
+		var req metricRequest
+		if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
+			logger.Log.Info("error unmarshaling metric", zap.String("Request", req.String()))
 			http.Error(w, err.Error(), http.StatusBadRequest)
 			return
 		}
 
-		var metric domain.Metric
-		if err = json.Unmarshal(buffer.Bytes(), &metric); err != nil {
-			logger.Log.Info("error unmarshaling metric", zap.String("Metric", metric.String()))
-			http.Error(w, err.Error(), http.StatusBadRequest)
-			return
-		}
-
+		metric := req.ToDomain()
 		if err := h.metricService.Save(r.Context(), metric); err != nil {
 			http.Error(w, "incorrect metric ID", http.StatusBadRequest)
 			return
 		}
 
-		resp, err := json.Marshal(metric)
-		if err != nil {
+		response := mapToMetricResponse(metric)
+
+		w.Header().Set("Content-Type", "application/json")
+		if err := json.NewEncoder(w).Encode(response); err != nil {
 			logger.Log.Info("error marshaling metric", zap.String("Metric", metric.String()))
 			http.Error(w, err.Error(), http.StatusInternalServerError)
 			return
 		}
-
-		w.Header().Set("Content-Type", "application/json")
-		w.Write(resp)
 		w.WriteHeader(http.StatusOK)
 	}
 }

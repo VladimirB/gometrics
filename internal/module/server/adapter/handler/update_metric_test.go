@@ -6,7 +6,6 @@ import (
 	"net/http"
 	"testing"
 
-	"github.com/VladimirB/gometrics/internal/domain"
 	"github.com/VladimirB/gometrics/internal/module/server/adapter/handler"
 
 	"github.com/stretchr/testify/assert"
@@ -80,7 +79,7 @@ func TestUpdateMetricHandler_UpdateCounterAndCheckSum(t *testing.T) {
 			Post(testServer.URL + "/update")
 		require.NoError(t, err2)
 
-		var resultMetric domain.Metric
+		var resultMetric handler.MetricResponse
 		resp, err := httpClient.R().
 			SetBody(fmt.Sprintf(`{"id": "%s", "type": "counter"}`, id)).
 			SetResult(&resultMetric).
