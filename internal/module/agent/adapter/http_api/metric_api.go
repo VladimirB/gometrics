@@ -1,4 +1,4 @@
-package http
+package http_api
 
 import (
 	"context"
@@ -27,7 +27,8 @@ func NewMetricApi(server string) *MetricApi {
 }
 
 func (c MetricApi) Send(ctx context.Context, metric models.Metrics) error {
-	body, err := json.Marshal(metric)
+	request := mapToMetricRequest(metric)
+	body, err := json.Marshal(request)
 	if err != nil {
 		return err
 	}

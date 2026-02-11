@@ -7,7 +7,7 @@ import (
 
 	"github.com/VladimirB/gometrics/internal/config"
 	model "github.com/VladimirB/gometrics/internal/model"
-	"github.com/VladimirB/gometrics/internal/module/agent/adapter/http"
+	"github.com/VladimirB/gometrics/internal/module/agent/adapter/http_api"
 	"github.com/VladimirB/gometrics/internal/module/agent/service"
 	"github.com/VladimirB/gometrics/internal/shared/logger"
 	"go.uber.org/zap"
@@ -25,7 +25,7 @@ func main() {
 
 	cfg := config.GetAgentConfig()
 
-	metricApi := http.NewMetricApi(cfg.Address)
+	metricApi := http_api.NewMetricApi(cfg.Address)
 	agentService := service.NewAgentService(metricApi, cfg.ReportInterval)
 
 	pollTicker := time.NewTicker(cfg.PollInterval)
