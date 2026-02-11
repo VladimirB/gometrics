@@ -20,7 +20,6 @@ type StorageType string
 
 const (
 	StorageTypeMemory StorageType = "memory"
-	StorageTypeFile   StorageType = "file"
 	StorageTypeDB     StorageType = "db"
 )
 
@@ -85,10 +84,6 @@ func parseServerFlags() serverFlags {
 func (c ServerConfig) MetricStorageType() StorageType {
 	if c.DatabaseDSN != "" {
 		return StorageTypeDB
-	}
-
-	if c.FileStoragePath != "" {
-		return StorageTypeFile
 	}
 
 	return StorageTypeMemory
