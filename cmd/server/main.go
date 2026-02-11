@@ -15,6 +15,7 @@ import (
 	"github.com/VladimirB/gometrics/internal/config"
 	"github.com/VladimirB/gometrics/internal/domain"
 	"github.com/VladimirB/gometrics/internal/module/server/adapter/handler"
+	"github.com/VladimirB/gometrics/internal/module/server/adapter/memory"
 	"github.com/VladimirB/gometrics/internal/module/server/port"
 	"github.com/VladimirB/gometrics/internal/module/server/service"
 	"github.com/VladimirB/gometrics/internal/repository"
@@ -34,35 +35,40 @@ func main() {
 	}
 	defer logger.Log.Sync()
 
-	config := config.GetServerConfig()
-	logger.Log.Info("Running Server", zap.String("Start time", time.Now().Local().String()), zap.Any("config", config))
+	serverConfig := config.GetServerConfig()
+	logger.Log.Info("Running Server", zap.String("Start time", time.Now().Local().String()))
 
 	ctx, stop := signal.NotifyContext(context.Background(), os.Interrupt, syscall.SIGTERM)
 	defer stop()
 
-	db, err := sql.Open("pgx", config.DatabaseDSN)
+	db, err := sql.Open("pgx", serverConfig.DatabaseDSN)
 	if err != nil {
 		logger.Log.Error("DB connection is not well", zap.Error(err))
 	}
 	defer db.Close()
 
-	memStorage := repository.NewMemStorage()
-	metricsService := service.NewMetricsService(memStorage)
+	var metricRepo port.MetricRepository
+	switch serverConfig.MetricStorageType() {
+	default:
+		metricRepo = memory.NewMemStorage()
+	}
+
+	metricsService := service.NewMetricsService(metricRepo)
 
 	// Если в конфигурации установлен флаг Restore, необходимо прочитать значения метрик из файла (путь в конфиге)
 	// и инициализировать хранилище метрик прочитанными значениями
-	if config.Restore {
-		initMetricsFromFile(ctx, config.FileStoragePath, metricsService)
+	if serverConfig.Restore {
+		initMetricsFromFile(ctx, serverConfig.FileStoragePath, metricsService)
 	}
 
-	go runStoreInFileTicker(ctx, config, metricsService)
+	go runStoreInFileTicker(ctx, serverConfig, metricsService)
 
 	mainPageTemplate := template.Must(template.ParseFS(templateFiles, "web/template/index.html"))
 	mainPageHandler := handler.NewMainPageHandler(metricsService, mainPageTemplate)
 	updateHandler := handler.NewUpdateMetricHandler(metricsService)
 	valueHandler := handler.NewValueMetricHandler(metricsService)
 	dbPingHandler := handler.NewDatabasePingHandler(db)
-	err = http.ListenAndServe(config.Address, handler.NewRouter(mainPageHandler, updateHandler, valueHandler, dbPingHandler))
+	err = http.ListenAndServe(serverConfig.Address, handler.NewRouter(mainPageHandler, updateHandler, valueHandler, dbPingHandler))
 	if err != nil {
 		logger.Log.Fatal(err.Error())
 	}

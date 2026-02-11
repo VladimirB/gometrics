@@ -5,16 +5,15 @@ import (
 
 	"github.com/VladimirB/gometrics/internal/domain"
 	"github.com/VladimirB/gometrics/internal/module/server/port"
-	"github.com/VladimirB/gometrics/internal/repository"
 )
 
 type metricService struct {
-	storage *repository.MemStorage
+	repo port.MetricRepository
 }
 
-func NewMetricsService(storage *repository.MemStorage) port.MetricService {
+func NewMetricsService(repo port.MetricRepository) port.MetricService {
 	return &metricService{
-		storage: storage,
+		repo: repo,
 	}
 }
 
@@ -25,12 +24,12 @@ func (s *metricService) Save(ctx context.Context, metric domain.Metric) error {
 
 	// Значения для счетчика необходимо сохранять в Delta
 	if metric.MType == domain.Counter && metric.Delta != nil {
-		if saved, err := s.storage.Get(metric.ID); err == nil {
+		if saved, err := s.repo.Get(ctx, metric.ID); err == nil {
 			*metric.Delta += *saved.Delta
 		}
 	}
 
-	s.storage.Save(metric.ID, metric)
+	s.repo.Save(ctx, metric)
 
 	return nil
 }
@@ -54,9 +53,9 @@ func (s *metricService) SaveByFields(ctx context.Context, metricType string, met
 }
 
 func (s *metricService) Get(ctx context.Context, metricID string) (domain.Metric, error) {
-	return s.storage.Get(metricID)
+	return s.repo.Get(ctx, metricID)
 }
 
 func (s *metricService) GetAll(ctx context.Context) map[string]domain.Metric {
-	return s.storage.GetAll()
+	return s.repo.GetAll(ctx)
 }

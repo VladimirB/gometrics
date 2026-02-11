@@ -16,6 +16,14 @@ const (
 	defaultRestore         = true
 )
 
+type StorageType string
+
+const (
+	StorageTypeMemory StorageType = "memory"
+	StorageTypeFile   StorageType = "file"
+	StorageTypeDB     StorageType = "db"
+)
+
 type ServerConfig struct {
 	Address         string `env:"ADDRESS"`           // адрес сервера
 	StoreInterval   int    `env:"STORE_INTERVAL"`    // интервал записи метрик на диск в секундах
@@ -72,4 +80,16 @@ func parseServerFlags() serverFlags {
 	flag.StringVar(&flags.databaseDSN, "d", "", "database connection string")
 	flag.Parse()
 	return flags
+}
+
+func (c ServerConfig) MetricStorageType() StorageType {
+	if c.DatabaseDSN != "" {
+		return StorageTypeDB
+	}
+
+	if c.FileStoragePath != "" {
+		return StorageTypeFile
+	}
+
+	return StorageTypeMemory
 }

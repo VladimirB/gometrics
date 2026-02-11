@@ -10,9 +10,9 @@ import (
 
 	"github.com/VladimirB/gometrics/internal/domain"
 	"github.com/VladimirB/gometrics/internal/module/server/adapter/handler"
+	"github.com/VladimirB/gometrics/internal/module/server/adapter/memory"
 	"github.com/VladimirB/gometrics/internal/module/server/port"
 	"github.com/VladimirB/gometrics/internal/module/server/service"
-	"github.com/VladimirB/gometrics/internal/repository"
 	"github.com/VladimirB/gometrics/internal/shared/compress"
 	"github.com/go-resty/resty/v2"
 	"github.com/stretchr/testify/assert"
@@ -26,7 +26,7 @@ var testServer *httptest.Server
 func setup() {
 	fmt.Println("Setup tests")
 
-	storage := repository.NewMemStorage()
+	storage := memory.NewMemStorage()
 	metricsService = service.NewMetricsService(storage)
 
 	testServer = handler.CreateTestServer(metricsService)
