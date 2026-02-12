@@ -14,4 +14,8 @@ type MetricService interface {
 	Get(ctx context.Context, metricID string) (domain.Metric, error)
 
 	GetAll(ctx context.Context) map[string]domain.Metric
+
+	RestoreFromFile(ctx context.Context, fileName string) error
+
+	DumpToFile(ctx context.Context, fileName string) error
 }

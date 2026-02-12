@@ -2,18 +2,21 @@ package service
 
 import (
 	"context"
+	"fmt"
 
 	"github.com/VladimirB/gometrics/internal/domain"
 	"github.com/VladimirB/gometrics/internal/module/server/port"
 )
 
 type metricService struct {
-	repo port.MetricRepository
+	repo        port.MetricRepository
+	fileStorage port.MetricFileStorage
 }
 
-func NewMetricsService(repo port.MetricRepository) port.MetricService {
+func NewMetricsService(repo port.MetricRepository, fileStorage port.MetricFileStorage) port.MetricService {
 	return &metricService{
-		repo: repo,
+		repo:        repo,
+		fileStorage: fileStorage,
 	}
 }
 
@@ -58,4 +61,34 @@ func (s *metricService) Get(ctx context.Context, metricID string) (domain.Metric
 
 func (s *metricService) GetAll(ctx context.Context) map[string]domain.Metric {
 	return s.repo.GetAll(ctx)
+}
+
+func (s *metricService) RestoreFromFile(ctx context.Context, fileName string) error {
+	metrics, err := s.fileStorage.Read(ctx, fileName)
+	if err != nil {
+		return fmt.Errorf("error on reading from file: %w", err)
+	}
+
+	for _, metric := range metrics {
+		if err := s.repo.Save(ctx, metric); err != nil {
+			return fmt.Errorf("error on save metric in repo: %w", err)
+		}
+	}
+
+	return nil
+}
+
+func (s *metricService) DumpToFile(ctx context.Context, fielName string) error {
+	metrics := s.repo.GetAll(ctx)
+
+	var temp []domain.Metric
+	for _, metric := range metrics {
+		temp = append(temp, metric)
+	}
+
+	if err := s.fileStorage.Write(ctx, temp, fielName); err != nil {
+		return fmt.Errorf("error on dump metrics to file: %w", err)
+	}
+
+	return nil
 }

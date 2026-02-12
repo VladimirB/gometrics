@@ -9,6 +9,7 @@ import (
 	"time"
 
 	"github.com/VladimirB/gometrics/internal/domain"
+	"github.com/VladimirB/gometrics/internal/module/server/adapter/file"
 	"github.com/VladimirB/gometrics/internal/module/server/adapter/handler"
 	"github.com/VladimirB/gometrics/internal/module/server/adapter/memory"
 	"github.com/VladimirB/gometrics/internal/module/server/port"
@@ -26,8 +27,9 @@ var testServer *httptest.Server
 func setup() {
 	fmt.Println("Setup tests")
 
-	storage := memory.NewMemStorage()
-	metricsService = service.NewMetricsService(storage)
+	metricRepository := memory.NewMemStorage()
+	metricFileStorage := file.NewFileStorage()
+	metricsService = service.NewMetricsService(metricRepository, metricFileStorage)
 
 	testServer = handler.CreateTestServer(metricsService)
 

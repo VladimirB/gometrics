@@ -13,12 +13,11 @@ import (
 	"time"
 
 	"github.com/VladimirB/gometrics/internal/config"
-	"github.com/VladimirB/gometrics/internal/domain"
+	"github.com/VladimirB/gometrics/internal/module/server/adapter/file"
 	"github.com/VladimirB/gometrics/internal/module/server/adapter/handler"
 	"github.com/VladimirB/gometrics/internal/module/server/adapter/memory"
 	"github.com/VladimirB/gometrics/internal/module/server/port"
 	"github.com/VladimirB/gometrics/internal/module/server/service"
-	"github.com/VladimirB/gometrics/internal/repository"
 	"github.com/VladimirB/gometrics/internal/shared/logger"
 	_ "github.com/jackc/pgx/v5/stdlib"
 	"go.uber.org/zap"
@@ -53,15 +52,19 @@ func main() {
 		metricRepo = memory.NewMemStorage()
 	}
 
-	metricsService := service.NewMetricsService(metricRepo)
+	fileStorage := file.NewFileStorage()
+
+	metricsService := service.NewMetricsService(metricRepo, fileStorage)
 
 	// Если в конфигурации установлен флаг Restore, необходимо прочитать значения метрик из файла (путь в конфиге)
 	// и инициализировать хранилище метрик прочитанными значениями
 	if serverConfig.Restore {
-		initMetricsFromFile(ctx, serverConfig.FileStoragePath, metricsService)
+		metricsService.RestoreFromFile(ctx, serverConfig.FileStoragePath)
 	}
 
-	go runStoreInFileTicker(ctx, serverConfig, metricsService)
+	if serverConfig.FileStoragePath != "" {
+		go runStoreInFileTicker(ctx, serverConfig, metricsService)
+	}
 
 	mainPageTemplate := template.Must(template.ParseFS(templateFiles, "web/template/index.html"))
 	mainPageHandler := handler.NewMainPageHandler(metricsService, mainPageTemplate)
@@ -74,27 +77,6 @@ func main() {
 	}
 }
 
-func initMetricsFromFile(ctx context.Context, fileName string, metricService port.MetricService) {
-	jsonFileReader, err := repository.NewMetricsFileReader(fileName)
-	if err != nil {
-		logger.Log.Error("Cant open file to read metrics", zap.Error(err))
-		return
-	}
-
-	result, err := jsonFileReader.Read()
-	if err != nil {
-		logger.Log.Error("Cant read metrics from file", zap.Error(err))
-		return
-	}
-
-	for _, m := range result {
-		err := metricService.Save(ctx, m)
-		if err != nil {
-			logger.Log.Error("Error on save metric", zap.Error(err), zap.String("Metric", m.String()))
-		}
-	}
-}
-
 func runStoreInFileTicker(ctx context.Context, config config.ServerConfig, metricService port.MetricService) {
 	storeInFileTicker := time.NewTicker(time.Duration(config.StoreInterval) * time.Second)
 	defer storeInFileTicker.Stop()
@@ -102,26 +84,9 @@ func runStoreInFileTicker(ctx context.Context, config config.ServerConfig, metri
 	for tick := range storeInFileTicker.C {
 		logger.Log.Info("Write metrics to file", zap.Any("Seconds from start", tick.Second()))
 
-		currentMetrics := metricService.GetAll(ctx)
-		if len(currentMetrics) == 0 {
-			continue
-		}
-
-		fileWriter, err := repository.NewMetricsFileWriter(config.FileStoragePath)
+		err := metricService.DumpToFile(ctx, config.FileStoragePath)
 		if err != nil {
-			logger.Log.Fatal("Cant initialize metrics file writer", zap.Error(err))
-			continue
+			logger.Log.Error("error on dump metrics to file", zap.Error(err))
 		}
-
-		var metrics []domain.Metric
-		for _, value := range currentMetrics {
-			metrics = append(metrics, value)
-		}
-
-		err = fileWriter.Write(metrics)
-		if err != nil {
-			logger.Log.Error("Error on metrics write to file", zap.Error(err))
-		}
-		fileWriter.Close()
 	}
 }
