@@ -25,8 +25,8 @@ func main() {
 
 	cfg := config.GetAgentConfig()
 
-	metricApi := httpapi.NewMetricAPI(cfg.Address)
-	agentService := service.NewAgentService(metricApi, cfg.ReportInterval)
+	metricAPI := httpapi.NewMetricAPI(cfg.Address)
+	agentService := service.NewAgentService(metricAPI, cfg.ReportInterval)
 
 	pollTicker := time.NewTicker(cfg.PollInterval)
 	defer pollTicker.Stop()
