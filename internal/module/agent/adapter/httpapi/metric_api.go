@@ -1,4 +1,4 @@
-package http_api
+package httpapi
 
 import (
 	"context"
@@ -14,19 +14,19 @@ import (
 	"go.uber.org/zap"
 )
 
-type MetricApi struct {
+type MetricAPI struct {
 	server string
 	client *resty.Client
 }
 
-func NewMetricApi(server string) *MetricApi {
-	return &MetricApi{
+func NewMetricAPI(server string) *MetricAPI {
+	return &MetricAPI{
 		server: server,
 		client: resty.New().SetTimeout(3 * time.Second),
 	}
 }
 
-func (c MetricApi) Send(ctx context.Context, metric domain.Metric) error {
+func (c MetricAPI) Send(ctx context.Context, metric domain.Metric) error {
 	request := mapToMetricRequest(metric)
 	body, err := json.Marshal(request)
 	if err != nil {
