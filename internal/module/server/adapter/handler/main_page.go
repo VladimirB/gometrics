@@ -7,6 +7,8 @@ import (
 
 	"github.com/VladimirB/gometrics/internal/domain"
 	"github.com/VladimirB/gometrics/internal/module/server/port"
+	"github.com/VladimirB/gometrics/internal/shared/logger"
+	"go.uber.org/zap"
 )
 
 type MainPageHandler struct {
@@ -35,11 +37,18 @@ func (h MainPageHandler) GetMainPage() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		w.Header().Set("Content-Type", "text/html; charset=utf-8")
 
-		metrics := h.metricService.GetAll(r.Context())
-		pageData := preparePageData(metrics)
-		err := h.template.Execute(w, pageData)
+		metrics, err := h.metricService.GetAll(r.Context())
 		if err != nil {
-			http.Error(w, "error on parsing of main page: "+err.Error(), http.StatusInternalServerError)
+			logger.Log.Error("cant get metrics for main page", zap.Error(err))
+			http.Error(w, "cant get metrics for main page", http.StatusInternalServerError)
+			return
+		}
+
+		pageData := preparePageData(metrics)
+		err = h.template.Execute(w, pageData)
+		if err != nil {
+			logger.Log.Error("failed parse main page", zap.Error(err))
+			http.Error(w, "failed parse main page: "+err.Error(), http.StatusInternalServerError)
 			return
 		}
 

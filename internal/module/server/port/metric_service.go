@@ -13,7 +13,7 @@ type MetricService interface {
 
 	Get(ctx context.Context, metricID string) (domain.Metric, error)
 
-	GetAll(ctx context.Context) map[string]domain.Metric
+	GetAll(ctx context.Context) (map[string]domain.Metric, error)
 
 	RestoreFromFile(ctx context.Context, fileName string) error
 

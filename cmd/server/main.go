@@ -13,6 +13,7 @@ import (
 	"time"
 
 	"github.com/VladimirB/gometrics/internal/config"
+	"github.com/VladimirB/gometrics/internal/module/server/adapter/database"
 	"github.com/VladimirB/gometrics/internal/module/server/adapter/file"
 	"github.com/VladimirB/gometrics/internal/module/server/adapter/handler"
 	"github.com/VladimirB/gometrics/internal/module/server/adapter/memory"
@@ -48,8 +49,12 @@ func main() {
 
 	var metricRepo port.MetricRepository
 	switch serverConfig.MetricStorageType() {
+	case config.StorageTypeDB:
+		metricRepo = database.NewPostgresRepo(db)
+		logger.Log.Info("Database storage will be used")
 	default:
 		metricRepo = memory.NewMemStorage()
+		logger.Log.Info("Memory storage will be used")
 	}
 
 	fileStorage := file.NewFileStorage()
@@ -62,7 +67,7 @@ func main() {
 		metricsService.RestoreFromFile(ctx, serverConfig.FileStoragePath)
 	}
 
-	if serverConfig.FileStoragePath != "" {
+	if serverConfig.MetricStorageType() == config.StorageTypeMemory {
 		go runStoreInFileTicker(ctx, serverConfig, metricsService)
 	}
 

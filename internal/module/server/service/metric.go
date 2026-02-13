@@ -32,9 +32,7 @@ func (s *metricService) Save(ctx context.Context, metric domain.Metric) error {
 		}
 	}
 
-	s.repo.Save(ctx, metric)
-
-	return nil
+	return s.repo.Save(ctx, metric)
 }
 
 func (s *metricService) SaveByFields(ctx context.Context, metricType string, metricID string, value float64) error {
@@ -59,7 +57,7 @@ func (s *metricService) Get(ctx context.Context, metricID string) (domain.Metric
 	return s.repo.Get(ctx, metricID)
 }
 
-func (s *metricService) GetAll(ctx context.Context) map[string]domain.Metric {
+func (s *metricService) GetAll(ctx context.Context) (map[string]domain.Metric, error) {
 	return s.repo.GetAll(ctx)
 }
 
@@ -79,7 +77,10 @@ func (s *metricService) RestoreFromFile(ctx context.Context, fileName string) er
 }
 
 func (s *metricService) DumpToFile(ctx context.Context, fielName string) error {
-	metrics := s.repo.GetAll(ctx)
+	metrics, err := s.repo.GetAll(ctx)
+	if err != nil {
+		return fmt.Errorf("cant get metrics from repo: %w", err)
+	}
 
 	var temp []domain.Metric
 	for _, metric := range metrics {

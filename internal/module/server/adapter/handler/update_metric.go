@@ -32,7 +32,8 @@ func (h UpdateMetricHandler) UpdateMetricJSONHandler() http.HandlerFunc {
 
 		metric := req.ToDomain()
 		if err := h.metricService.Save(r.Context(), metric); err != nil {
-			http.Error(w, "incorrect metric ID", http.StatusBadRequest)
+			logger.Log.Error("error on update metric", zap.Error(err))
+			http.Error(w, "error on update metric", http.StatusBadRequest)
 			return
 		}
 

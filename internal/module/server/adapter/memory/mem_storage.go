@@ -38,6 +38,6 @@ func (ms *MemStorage) Get(ctx context.Context, metricID string) (domain.Metric, 
 	}
 }
 
-func (ms *MemStorage) GetAll(ctx context.Context) map[string]domain.Metric {
-	return ms.storage
+func (ms *MemStorage) GetAll(ctx context.Context) (map[string]domain.Metric, error) {
+	return ms.storage, nil
 }

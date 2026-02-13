@@ -1,5 +1,6 @@
+BEGIN;
 -- Создаем тип для метрики
-CREATE TYPE metric_type AS ENUM ('Gauge', 'Counter');
+CREATE TYPE metric_type AS ENUM ('gauge', 'counter');
 
 -- Таблица для хранения метрик
 CREATE TABLE metrics (
@@ -8,3 +9,4 @@ CREATE TABLE metrics (
     delta BIGINT,
     value DOUBLE PRECISION
 );
+COMMIT;
