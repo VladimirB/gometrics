@@ -53,7 +53,7 @@ func (r *PostgresRepo) Get(ctx context.Context, metricID string) (domain.Metric,
 }
 
 func (r *PostgresRepo) GetAll(ctx context.Context) (map[string]domain.Metric, error) {
-	query := "SELECT id, type, delta, value FROM metrics";
+	query := "SELECT id, type, delta, value FROM metrics"
 
 	rows, err := r.db.QueryContext(ctx, query)
 	if err != nil {
