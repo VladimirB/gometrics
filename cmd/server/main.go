@@ -42,14 +42,13 @@ func main() {
 
 	ctx := context.Background()
 
-	var db *sql.DB
-	if serverConfig.DatabaseDSN != "" {
-		db, err := sql.Open("postgres", serverConfig.DatabaseDSN)
-		if err != nil {
-			logger.Log.Error("DB connection is not well", zap.Error(err))
-		}
-		defer db.Close()
+	db, err := sql.Open("postgres", serverConfig.DatabaseDSN)
+	if err != nil {
+		logger.Log.Error("DB connection is not well", zap.Error(err))
+	}
+	defer db.Close()
 
+	if serverConfig.DatabaseDSN != "" {
 		runMigrations(db)
 	}
 
@@ -82,7 +81,7 @@ func main() {
 	updateHandler := handler.NewUpdateMetricHandler(metricsService)
 	valueHandler := handler.NewValueMetricHandler(metricsService)
 	dbPingHandler := handler.NewDatabasePingHandler(db)
-	err := http.ListenAndServe(serverConfig.Address, handler.NewRouter(mainPageHandler, updateHandler, valueHandler, dbPingHandler))
+	err = http.ListenAndServe(serverConfig.Address, handler.NewRouter(mainPageHandler, updateHandler, valueHandler, dbPingHandler))
 	if err != nil {
 		logger.Log.Fatal(err.Error())
 	}
