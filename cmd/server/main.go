@@ -19,8 +19,8 @@ import (
 	"github.com/VladimirB/gometrics/internal/module/server/service"
 	"github.com/VladimirB/gometrics/internal/shared/logger"
 	"github.com/VladimirB/gometrics/migrations"
-	"github.com/golang-migrate/migrate/v4/database/postgres"
 	"github.com/golang-migrate/migrate/v4"
+	"github.com/golang-migrate/migrate/v4/database/postgres"
 	"github.com/golang-migrate/migrate/v4/source/iofs"
 	_ "github.com/jackc/pgx/v5/stdlib"
 	"go.uber.org/zap"
@@ -42,13 +42,16 @@ func main() {
 
 	ctx := context.Background()
 
-	db, err := sql.Open("postgres", serverConfig.DatabaseDSN)
-	if err != nil {
-		logger.Log.Error("DB connection is not well", zap.Error(err))
-	}
-	defer db.Close()
+	var db *sql.DB
+	if serverConfig.DatabaseDSN != "" {
+		db, err := sql.Open("postgres", serverConfig.DatabaseDSN)
+		if err != nil {
+			logger.Log.Error("DB connection is not well", zap.Error(err))
+		}
+		defer db.Close()
 
-	runMigrations(db)
+		runMigrations(db)
+	}
 
 	var metricRepo port.MetricRepository
 	switch serverConfig.MetricStorageType() {
@@ -79,7 +82,7 @@ func main() {
 	updateHandler := handler.NewUpdateMetricHandler(metricsService)
 	valueHandler := handler.NewValueMetricHandler(metricsService)
 	dbPingHandler := handler.NewDatabasePingHandler(db)
-	err = http.ListenAndServe(serverConfig.Address, handler.NewRouter(mainPageHandler, updateHandler, valueHandler, dbPingHandler))
+	err := http.ListenAndServe(serverConfig.Address, handler.NewRouter(mainPageHandler, updateHandler, valueHandler, dbPingHandler))
 	if err != nil {
 		logger.Log.Fatal(err.Error())
 	}
