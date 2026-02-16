@@ -4,6 +4,7 @@ import (
 	"context"
 	"database/sql"
 	"embed"
+	"errors"
 	"html/template"
 	"log"
 	"net/http"
@@ -17,6 +18,10 @@ import (
 	"github.com/VladimirB/gometrics/internal/module/server/port"
 	"github.com/VladimirB/gometrics/internal/module/server/service"
 	"github.com/VladimirB/gometrics/internal/shared/logger"
+	"github.com/VladimirB/gometrics/migrations"
+	"github.com/golang-migrate/migrate/v4/database/postgres"
+	"github.com/golang-migrate/migrate/v4"
+	"github.com/golang-migrate/migrate/v4/source/iofs"
 	_ "github.com/jackc/pgx/v5/stdlib"
 	"go.uber.org/zap"
 )
@@ -37,11 +42,13 @@ func main() {
 
 	ctx := context.Background()
 
-	db, err := sql.Open("pgx", serverConfig.DatabaseDSN)
+	db, err := sql.Open("postgres", serverConfig.DatabaseDSN)
 	if err != nil {
 		logger.Log.Error("DB connection is not well", zap.Error(err))
 	}
 	defer db.Close()
+
+	runMigrations(db)
 
 	var metricRepo port.MetricRepository
 	switch serverConfig.MetricStorageType() {
@@ -76,6 +83,33 @@ func main() {
 	if err != nil {
 		logger.Log.Fatal(err.Error())
 	}
+}
+
+func runMigrations(db *sql.DB) {
+	sourceDriver, err := iofs.New(migrations.FS, ".")
+	if err != nil {
+		logger.Log.Error("source driver error", zap.Error(err))
+	}
+
+	dbDriver, err := postgres.WithInstance(db, &postgres.Config{})
+	if err != nil {
+		logger.Log.Error("db driver error", zap.Error(err))
+	}
+
+	migrator, err := migrate.NewWithInstance("iofs", sourceDriver, "postgres", dbDriver)
+	if err != nil {
+		logger.Log.Error("migrator error", zap.Error(err))
+	}
+
+	if err := migrator.Up(); err != nil {
+		if errors.Is(err, migrate.ErrNoChange) {
+			logger.Log.Info("db in actual state")
+		} else {
+			logger.Log.Error("migration error", zap.Error(err))
+		}
+	}
+
+	logger.Log.Info("Migrations completed!")
 }
 
 func runStoreInFileTicker(ctx context.Context, config config.ServerConfig, metricService port.MetricService) {
