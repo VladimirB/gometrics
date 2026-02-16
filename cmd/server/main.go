@@ -7,9 +7,6 @@ import (
 	"html/template"
 	"log"
 	"net/http"
-	"os"
-	"os/signal"
-	"syscall"
 	"time"
 
 	"github.com/VladimirB/gometrics/internal/config"
@@ -38,8 +35,7 @@ func main() {
 	serverConfig := config.GetServerConfig()
 	logger.Log.Info("Running Server", zap.String("Start time", time.Now().Local().String()))
 
-	ctx, stop := signal.NotifyContext(context.Background(), os.Interrupt, syscall.SIGTERM)
-	defer stop()
+	ctx := context.Background()
 
 	db, err := sql.Open("pgx", serverConfig.DatabaseDSN)
 	if err != nil {
