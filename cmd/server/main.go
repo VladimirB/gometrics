@@ -2,7 +2,6 @@ package main
 
 import (
 	"context"
-	"database/sql"
 	"embed"
 	"errors"
 	"html/template"
@@ -23,6 +22,7 @@ import (
 	"github.com/golang-migrate/migrate/v4/database/postgres"
 	"github.com/golang-migrate/migrate/v4/source/iofs"
 	_ "github.com/jackc/pgx/v5/stdlib"
+	"github.com/jmoiron/sqlx"
 	"go.uber.org/zap"
 )
 
@@ -42,7 +42,7 @@ func main() {
 
 	ctx := context.Background()
 
-	db, err := sql.Open("postgres", serverConfig.DatabaseDSN)
+	db, err := sqlx.Connect("postgres", serverConfig.DatabaseDSN)
 	if err != nil {
 		logger.Log.Error("DB connection is not well", zap.Error(err))
 	}
@@ -87,18 +87,18 @@ func main() {
 	}
 }
 
-func runMigrations(db *sql.DB) {
+func runMigrations(db *sqlx.DB) {
 	sourceDriver, err := iofs.New(migrations.FS, ".")
 	if err != nil {
 		logger.Log.Error("source driver error", zap.Error(err))
 	}
 
-	dbDriver, err := postgres.WithInstance(db, &postgres.Config{})
+	driver, err := postgres.WithInstance(db.DB, &postgres.Config{})
 	if err != nil {
 		logger.Log.Error("db driver error", zap.Error(err))
 	}
 
-	migrator, err := migrate.NewWithInstance("iofs", sourceDriver, "postgres", dbDriver)
+	migrator, err := migrate.NewWithInstance("iofs", sourceDriver, "postgres", driver)
 	if err != nil {
 		logger.Log.Error("migrator error", zap.Error(err))
 	}

@@ -59,6 +59,8 @@ func (h ValueMetricHandler) PostValueMetricHandler() http.HandlerFunc {
 
 		metric, err := h.metricService.Get(r.Context(), req.ID)
 		if err != nil { // в случае ошибки по требования нужно возвращать пустое значение метрики
+			logger.Log.Error("metric /value error", zap.Error(err))
+			
 			metric = domain.Metric{
 				ID:    req.ID,
 				MType: req.MType,

@@ -12,15 +12,18 @@ import (
 
 	"github.com/DATA-DOG/go-sqlmock"
 	"github.com/VladimirB/gometrics/internal/module/server/port"
+	"github.com/jmoiron/sqlx"
 	"github.com/stretchr/testify/require"
 )
 
 func CreateTestServer(service port.MetricService) *httptest.Server {
-	db, _, err := sqlmock.New()
+	mockDB, _, err := sqlmock.New()
 	if err != nil {
 		log.Fatalf("Error on sqlmock creation: %s", err)
 	}
-	defer db.Close()
+	defer mockDB.Close()
+
+	db := sqlx.NewDb(mockDB, "sqlmock")
 
 	metricsService := service
 	mainPageHandler := NewMainPageHandler(metricsService, nil)

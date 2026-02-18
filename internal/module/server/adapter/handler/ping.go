@@ -2,16 +2,17 @@ package handler
 
 import (
 	"context"
-	"database/sql"
 	"net/http"
 	"time"
+
+	"github.com/jmoiron/sqlx"
 )
 
 type DatabasePingHandler struct {
-	db *sql.DB
+	db *sqlx.DB
 }
 
-func NewDatabasePingHandler(db *sql.DB) *DatabasePingHandler {
+func NewDatabasePingHandler(db *sqlx.DB) *DatabasePingHandler {
 	return &DatabasePingHandler{
 		db: db,
 	}
