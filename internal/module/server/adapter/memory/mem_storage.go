@@ -26,6 +26,20 @@ func (ms *MemStorage) Save(ctx context.Context, metric domain.Metric) error {
 	return nil
 }
 
+func (ms *MemStorage) SaveAll(ctx context.Context, metrics []domain.Metric) error {
+	if err := ctx.Err(); err != nil {
+		return fmt.Errorf("repo save aborted: %w", err)
+	}
+
+	for _, m := range metrics {
+		if err := ms.Save(ctx, m); err != nil {
+			return err
+		}
+	}
+
+	return nil
+}
+
 func (ms *MemStorage) Get(ctx context.Context, metricID string) (domain.Metric, error) {
 	if err := ctx.Err(); err != nil {
 		return domain.Metric{}, fmt.Errorf("repo save aborted: %w", err)

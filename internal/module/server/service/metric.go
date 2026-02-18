@@ -36,7 +36,7 @@ func (s *metricService) Save(ctx context.Context, metric domain.Metric) error {
 }
 
 func (s *metricService) SaveAll(ctx context.Context, metrics []domain.Metric) error {
-	return nil
+	return s.repo.SaveAll(ctx, metrics)
 }
 
 func (s *metricService) SaveByFields(ctx context.Context, metricType string, metricID string, value float64) error {
