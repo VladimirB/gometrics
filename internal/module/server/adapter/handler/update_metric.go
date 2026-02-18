@@ -5,6 +5,7 @@ import (
 	"net/http"
 	"strconv"
 
+	"github.com/VladimirB/gometrics/internal/domain"
 	"github.com/VladimirB/gometrics/internal/module/server/port"
 	"github.com/VladimirB/gometrics/internal/shared/logger"
 	"github.com/go-chi/chi/v5"
@@ -22,7 +23,26 @@ func NewUpdateMetricHandler(service port.MetricService) *UpdateMetricHandler {
 }
 
 func (h *UpdateMetricHandler) UpdateMetricsBunchHandler() http.HandlerFunc {
-	return func (w http.ResponseWriter, r *http.Request)  {
+	return func(w http.ResponseWriter, r *http.Request) {
+		var reqs []metricRequest
+
+		if err := json.NewDecoder(r.Body).Decode(&reqs); err != nil {
+			logger.Log.Error("decode json error", zap.Error(err))
+			http.Error(w, err.Error(), http.StatusBadRequest)
+			return
+		}
+
+		metrics := make([]domain.Metric, len(reqs))
+		for i, req := range reqs {
+			metrics[i] = req.ToDomain()
+		}
+
+		if err := h.metricService.SaveAll(r.Context(), metrics); err != nil {
+			logger.Log.Error("save bunch error", zap.Error(err))
+			http.Error(w, err.Error(), http.StatusInternalServerError)
+			return
+		}
+
 		w.Header().Set("Content-Type", "application/json")
 		w.WriteHeader(http.StatusOK)
 	}

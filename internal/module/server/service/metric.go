@@ -35,6 +35,10 @@ func (s *metricService) Save(ctx context.Context, metric domain.Metric) error {
 	return s.repo.Save(ctx, metric)
 }
 
+func (s *metricService) SaveAll(ctx context.Context, metrics []domain.Metric) error {
+	return nil
+}
+
 func (s *metricService) SaveByFields(ctx context.Context, metricType string, metricID string, value float64) error {
 	metric := domain.Metric{
 		ID:    metricID,

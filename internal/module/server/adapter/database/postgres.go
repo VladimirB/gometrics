@@ -44,7 +44,7 @@ func (r *PostgresRepo) Get(ctx context.Context, metricID string) (domain.Metric,
 	var row metricDB
 
 	query := "SELECT id, type, delta, value FROM metrics WHERE id = $1"
-	
+
 	if err := r.db.GetContext(ctx, &row, query, metricID); err != nil {
 		return domain.Metric{}, fmt.Errorf("metric %s not found in db: %w", metricID, err)
 	}
