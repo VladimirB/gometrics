@@ -26,5 +26,5 @@ vendor/
 
 # My ignores
 metrics.json
-./server
-./agent
+server
+agent
