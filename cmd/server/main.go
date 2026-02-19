@@ -42,11 +42,10 @@ func main() {
 
 	ctx := context.Background()
 
-	db, err := sqlx.Connect("postgres", serverConfig.DatabaseDSN)
+	db, err := sqlx.Open("postgres", serverConfig.DatabaseDSN)
 	if err != nil {
 		logger.Log.Error("DB connection is not well", zap.Error(err))
 	}
-	defer db.Close()
 
 	if serverConfig.DatabaseDSN != "" {
 		runMigrations(db)
