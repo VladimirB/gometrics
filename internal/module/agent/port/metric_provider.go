@@ -8,4 +8,6 @@ import (
 
 type MetricProvider interface {
 	Send(ctx context.Context, metric domain.Metric) error
+
+	SendAll(ctx context.Context, metrics []domain.Metric) error
 }

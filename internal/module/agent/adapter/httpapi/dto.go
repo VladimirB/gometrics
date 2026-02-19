@@ -2,7 +2,7 @@ package httpapi
 
 import "github.com/VladimirB/gometrics/internal/domain"
 
-type metricRequest struct {
+type metricDTO struct {
 	ID    string   `json:"id"`
 	MType string   `json:"type"`
 	Delta *int64   `json:"delta,omitempty"` // значение метрики в случае передачи counter
@@ -10,8 +10,8 @@ type metricRequest struct {
 	Hash  string   `json:"hash,omitempty"`
 }
 
-func mapToMetricRequest(m domain.Metric) metricRequest {
-	return metricRequest{
+func mapToMetricDTO(m domain.Metric) metricDTO {
+	return metricDTO{
 		ID:    m.ID,
 		MType: m.MType,
 		Delta: m.Delta,

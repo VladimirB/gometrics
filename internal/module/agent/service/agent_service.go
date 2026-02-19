@@ -2,7 +2,7 @@ package service
 
 import (
 	"context"
-	"errors"
+	"fmt"
 	"math/rand"
 	"runtime"
 	"time"
@@ -95,12 +95,15 @@ func (a AgentService) SendMetrics(ctx context.Context, metrics map[string]domain
 	ctx, cancel := context.WithTimeout(ctx, a.reportMetricTimeout)
 	defer cancel()
 
-	for _, metric := range metrics {
-		if err := a.metricProvider.Send(ctx, metric); err != nil {
-			logger.Log.Error("error on metric send", zap.Error(err), zap.String("Metric", metric.String()))
-			fill(metrics, domain.Counter, domain.PollCount, 0)
-			return errors.New("error on metric send")
-		}
+	var bunch []domain.Metric
+	for _, v := range metrics {
+		bunch = append(bunch, v)
+	}
+
+	if err := a.metricProvider.SendAll(ctx, bunch); err != nil {
+		fill(metrics, domain.Counter, domain.PollCount, 0)
+		logger.Log.Error("send metrics failed", zap.Error(err))
+		return fmt.Errorf("send metrics failed: %w", err)
 	}
 
 	return nil
