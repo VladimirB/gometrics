@@ -52,7 +52,7 @@ func (r *PostgresRepo) SaveAll(ctx context.Context, metrics []domain.Metric) err
 		VALUES (:id, :type, :delta, :value, :updated_at)
 		ON CONFLICT (id)
 		DO UPDATE SET
-			delta = EXCLUDED.delta,
+			delta = COALESCE(metrics.delta, 0) + EXCLUDED.delta,
 			value = EXCLUDED.value,
 			updated_at = EXCLUDED.updated_at
 	`

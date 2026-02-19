@@ -24,16 +24,16 @@ func NewUpdateMetricHandler(service port.MetricService) *UpdateMetricHandler {
 
 func (h *UpdateMetricHandler) UpdateMetricsBatchHandler() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-		var reqs []metricDTO
+		var dtos []metricDTO
 
-		if err := json.NewDecoder(r.Body).Decode(&reqs); err != nil {
+		if err := json.NewDecoder(r.Body).Decode(&dtos); err != nil {
 			logger.Log.Error("decode json error", zap.Error(err))
 			http.Error(w, err.Error(), http.StatusBadRequest)
 			return
 		}
 
-		metrics := make([]domain.Metric, len(reqs))
-		for i, req := range reqs {
+		metrics := make([]domain.Metric, len(dtos))
+		for i, req := range dtos {
 			metrics[i] = req.ToDomain()
 		}
 
