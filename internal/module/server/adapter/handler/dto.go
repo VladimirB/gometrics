@@ -6,14 +6,14 @@ import (
 	"github.com/VladimirB/gometrics/internal/domain"
 )
 
-type metricRequest struct {
+type metricDTO struct {
 	ID    string   `json:"id"`
 	MType string   `json:"type"`
 	Delta *int64   `json:"delta,omitempty"` // значение метрики в случае передачи counter
 	Value *float64 `json:"value,omitempty"` // значение метрики в случае передачи gauge
 }
 
-func (r metricRequest) ToDomain() domain.Metric {
+func (r metricDTO) ToDomain() domain.Metric {
 	return domain.Metric{
 		ID:    r.ID,
 		MType: r.MType,
@@ -22,7 +22,7 @@ func (r metricRequest) ToDomain() domain.Metric {
 	}
 }
 
-func (r metricRequest) String() string {
+func (r metricDTO) String() string {
 	return fmt.Sprintf("MetricRequest(ID: %s, MType: %s, Delta: %p, Value: %p)", r.ID, r.MType, r.Delta, r.Value)
 }
 

@@ -21,7 +21,9 @@ func NewRouter(mainPageHandler *MainPageHandler,
 			r.Post("/{metricType}/{metricName}/{metricValue}", middleware.RequestLogger(updateHandler.UpdateMetricByNameHandler()))
 		})
 
-		r.Post("/updates", middleware.RequestLogger(middleware.GZip(updateHandler.UpdateMetricsBunchHandler())))
+		r.Route("/updates", func(r chi.Router) {
+			r.Post("/", middleware.RequestLogger(middleware.GZip(updateHandler.UpdateMetricsBatchHandler())))
+		})
 
 		r.Route("/value", func(r chi.Router) {
 			r.Post("/", middleware.RequestLogger(middleware.GZip(valueHandler.PostValueMetricHandler())))

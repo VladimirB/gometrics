@@ -22,9 +22,9 @@ func NewUpdateMetricHandler(service port.MetricService) *UpdateMetricHandler {
 	}
 }
 
-func (h *UpdateMetricHandler) UpdateMetricsBunchHandler() http.HandlerFunc {
+func (h *UpdateMetricHandler) UpdateMetricsBatchHandler() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-		var reqs []metricRequest
+		var reqs []metricDTO
 
 		if err := json.NewDecoder(r.Body).Decode(&reqs); err != nil {
 			logger.Log.Error("decode json error", zap.Error(err))
@@ -50,7 +50,7 @@ func (h *UpdateMetricHandler) UpdateMetricsBunchHandler() http.HandlerFunc {
 
 func (h UpdateMetricHandler) UpdateMetricJSONHandler() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-		var req metricRequest
+		var req metricDTO
 		if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
 			logger.Log.Info("error unmarshaling metric", zap.String("Request", req.String()))
 			http.Error(w, err.Error(), http.StatusBadRequest)

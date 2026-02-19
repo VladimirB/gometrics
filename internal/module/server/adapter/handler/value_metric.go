@@ -50,7 +50,7 @@ func (h ValueMetricHandler) GetMetricHandler() http.HandlerFunc {
 
 func (h ValueMetricHandler) PostValueMetricHandler() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-		var req metricRequest
+		var req metricDTO
 		if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
 			logger.Log.Error("cant decode request from JSON", zap.Error(err))
 			http.Error(w, err.Error(), http.StatusBadRequest)
