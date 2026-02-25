@@ -95,12 +95,12 @@ func (a AgentService) SendMetrics(ctx context.Context, metrics map[string]domain
 	ctx, cancel := context.WithTimeout(ctx, a.reportMetricTimeout)
 	defer cancel()
 
-	var bunch []domain.Metric
+	var batch []domain.Metric
 	for _, v := range metrics {
-		bunch = append(bunch, v)
+		batch = append(batch, v)
 	}
 
-	if err := a.metricProvider.SendAll(ctx, bunch); err != nil {
+	if err := a.metricProvider.SendAll(ctx, batch); err != nil {
 		fill(metrics, domain.Counter, domain.PollCount, 0)
 		logger.Log.Error("send metrics failed", zap.Error(err))
 		return fmt.Errorf("send metrics failed: %w", err)
