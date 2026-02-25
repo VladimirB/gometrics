@@ -6,6 +6,8 @@ import (
 	"time"
 
 	"github.com/VladimirB/gometrics/internal/domain"
+	"github.com/VladimirB/gometrics/internal/shared/apperrors"
+	"github.com/VladimirB/gometrics/internal/shared/retry"
 	"github.com/jmoiron/sqlx"
 )
 
@@ -41,41 +43,55 @@ func (r *PostgresRepo) Save(ctx context.Context, metric domain.Metric) error {
 }
 
 func (r *PostgresRepo) SaveAll(ctx context.Context, metrics []domain.Metric) error {
-	tx, err := r.db.BeginTxx(ctx, nil)
-	if err != nil {
-		return fmt.Errorf("failed begin transaction: %w", err)
-	}
-	defer tx.Rollback()
-
-	query := `
-		INSERT INTO metrics (id, type, delta, value, updated_at)
-		VALUES (:id, :type, :delta, :value, :updated_at)
-		ON CONFLICT (id)
-		DO UPDATE SET
-			delta = COALESCE(metrics.delta, 0) + EXCLUDED.delta,
-			value = EXCLUDED.value,
-			updated_at = EXCLUDED.updated_at
-	`
-
-	stmt, err := tx.PrepareNamedContext(ctx, query)
-	if err != nil {
-		return fmt.Errorf("failed statement prepare: %w", err)
-	}
-	defer stmt.Close()
-
-	for _, metric := range metrics {
-		metricDB := FromDomain(&metric, time.Now().UTC())
-
-		if _, err := stmt.ExecContext(ctx, metricDB); err != nil {
-			return fmt.Errorf("failed exec request: %w", err)
+	return retry.DoRetry(ctx, func() error {
+		tx, err := r.db.BeginTxx(ctx, nil)
+		if err != nil {
+			if apperrors.IsDBConnectionError(err) {
+				return fmt.Errorf("no connection on begin transaction: %w", apperrors.ErrDBConnection)
+			}
+			return fmt.Errorf("failed begin transaction: %w", err)
 		}
-	}
+		defer tx.Rollback()
 
-	if err := tx.Commit(); err != nil {
-		return fmt.Errorf("transaction commit error: %w", err)
-	}
+		query := `
+			INSERT INTO metrics (id, type, delta, value, updated_at)
+			VALUES (:id, :type, :delta, :value, :updated_at)
+			ON CONFLICT (id)
+			DO UPDATE SET
+				delta = COALESCE(metrics.delta, 0) + EXCLUDED.delta,
+				value = EXCLUDED.value,
+				updated_at = EXCLUDED.updated_at
+		`
 
-	return nil
+		stmt, err := tx.PrepareNamedContext(ctx, query)
+		if err != nil {
+			if apperrors.IsDBConnectionError(err) {
+				return fmt.Errorf("no connection on prepare query: %w", apperrors.ErrDBConnection)
+			}
+			return fmt.Errorf("failed statement prepare: %w", err)
+		}
+		defer stmt.Close()
+
+		for _, metric := range metrics {
+			metricDB := FromDomain(&metric, time.Now().UTC())
+
+			if _, err := stmt.ExecContext(ctx, metricDB); err != nil {
+				if apperrors.IsDBConnectionError(err) {
+					return fmt.Errorf("no connection on execute query: %w", apperrors.ErrDBConnection)
+				}
+				return fmt.Errorf("failed exec request: %w", err)
+			}
+		}
+
+		if err := tx.Commit(); err != nil {
+			if apperrors.IsDBConnectionError(err) {
+				return fmt.Errorf("no connection on transaction commit: %w", apperrors.ErrDBConnection)
+			}
+			return fmt.Errorf("transaction commit error: %w", err)
+		}
+
+		return nil
+	})
 }
 
 func (r *PostgresRepo) Get(ctx context.Context, metricID string) (domain.Metric, error) {
