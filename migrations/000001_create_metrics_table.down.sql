@@ -1,0 +1,4 @@
+BEGIN;
+DROP TABLE IF EXISTS metrics;
+DROP TYPE IF EXISTS metric_type;
+COMMIT;

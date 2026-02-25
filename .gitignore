@@ -23,3 +23,8 @@ vendor/
 # IDEs directories
 .idea
 .vscode
+
+# My ignores
+metrics.json
+/server
+/agent
